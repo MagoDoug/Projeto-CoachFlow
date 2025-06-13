@@ -10,8 +10,8 @@
 
 window.EMAILJS_CONFIG = {
   // Substitua pelos seus valores reais do EmailJS
-  SERVICE_ID: "seu_service_id_aqui", // Ex: "service_abc123"
-  PUBLIC_KEY: "sua_chave_publica_aqui", // Ex: "user_xyz789"
+  SERVICE_ID: "service_ik0b5tp", // Ex: "service_abc123"
+  PUBLIC_KEY: "mH4Lr2yeMa_QJpkRa", // Ex: "user_xyz789"
 
   // IDs dos templates que você criou no EmailJS
   TEMPLATES: {
@@ -23,7 +23,7 @@ window.EMAILJS_CONFIG = {
   },
 
   // Configurações adicionais
-  ENABLED: false, // Mude para true quando configurar corretamente
+  ENABLED: true, // Mude para true quando configurar corretamente
 
   // Templates de exemplo para referência
   TEMPLATE_EXAMPLES: {
