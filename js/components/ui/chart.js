@@ -1,5 +1,5 @@
 // Componentes de gráfico para o CoachFlow
-// Este arquivo exporta todos os componentes necessários para os gráficos
+// Este arquivo define funções globais para os gráficos
 
 // Componente de container para gráficos
 function ChartContainer(props) {
@@ -165,8 +165,7 @@ function ChartStyle(props) {
   return style
 }
 
-// Exportar para o escopo global
-window.Chart = window.Chart || {}
+// Disponibilizar funções globalmente
 window.ChartContainer = ChartContainer
 window.ChartTooltip = ChartTooltip
 window.ChartTooltipContent = ChartTooltipContent

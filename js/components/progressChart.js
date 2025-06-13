@@ -1,5 +1,15 @@
+import { ChartStyle } from "@/components/ui/chart"
+import { ChartLegendContent } from "@/components/ui/chart"
+import { ChartLegend } from "@/components/ui/chart"
+import { ChartTooltipContent } from "@/components/ui/chart"
+import { ChartTooltip } from "@/components/ui/chart"
+import { ChartContainer } from "@/components/ui/chart"
 import { Chart } from "@/components/ui/chart"
 // Componente de gráfico de progresso
+// Removida a importação: import {
+Chart, ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent, ChartStyle
+\
+} from "@/components/ui/chart"
 
 function createProgressChart(clientId, containerId) {
   // Criar o container para o gráfico
@@ -8,15 +18,6 @@ function createProgressChart(clientId, containerId) {
 
   // Limpar o container
   container.innerHTML = ""
-
-  // Adicionar estilos para o gráfico
-  const chartStyle = window.ChartStyle({
-    colors: {
-      1: "#4f46e5", // Indigo
-      2: "#10b981", // Green
-    },
-  })
-  document.head.appendChild(chartStyle)
 
   // Criar o canvas para o gráfico
   const canvas = document.createElement("canvas")
@@ -44,9 +45,9 @@ function createProgressChart(clientId, containerId) {
       const labels = progressData.map((item) => `Sessão ${item.sessionNumber}`)
       const data = progressData.map((item) => item.progressValue)
 
-      // Criar o gráfico usando Chart.js
+      // Criar o gráfico usando Chart.js global
       const ctx = canvas.getContext("2d")
-      new Chart(ctx, {
+      new window.Chart(ctx, {
         type: "line",
         data: {
           labels: labels,
