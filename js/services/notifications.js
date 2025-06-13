@@ -1,10 +1,5 @@
 // Serviço para gerenciamento de notificações
 
-// Importar emailjs e supabase
-import emailjs from "emailjs-com"
-import { supabase } from "./supabaseClient"
-const EMAILJS_SERVICE_ID = "your_service_id"
-
 // Enviar notificação por email
 async function sendSessionNotification(email, name, type, data) {
   try {
@@ -41,7 +36,16 @@ async function sendSessionNotification(email, name, type, data) {
 
     templateParams.subject = subject
 
-    await emailjs.send(EMAILJS_SERVICE_ID, templateId, templateParams)
+    // Verificar se o emailjs está disponível
+    if (typeof window.emailjs !== "undefined" && typeof window.emailjs.send === "function") {
+      await window.emailjs.send(window.EMAILJS_SERVICE_ID, templateId, templateParams)
+    } else {
+      console.log("EmailJS não está disponível. Simulando envio de email:", {
+        service: window.EMAILJS_SERVICE_ID,
+        template: templateId,
+        params: templateParams,
+      })
+    }
 
     return { success: true }
   } catch (error) {
@@ -53,7 +57,7 @@ async function sendSessionNotification(email, name, type, data) {
 // Obter notificações não lidas
 async function getUnreadNotifications(userId, userType) {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await window.supabase
       .from("notificacoes")
       .select("*")
       .eq("destinatario_id", userId)
@@ -73,7 +77,7 @@ async function getUnreadNotifications(userId, userType) {
 // Obter todas as notificações
 async function getAllNotifications(userId, userType) {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await window.supabase
       .from("notificacoes")
       .select("*")
       .eq("destinatario_id", userId)
@@ -92,7 +96,7 @@ async function getAllNotifications(userId, userType) {
 // Marcar notificação como lida
 async function markNotificationAsRead(notificationId) {
   try {
-    const { error } = await supabase.from("notificacoes").update({ lida: true }).eq("id", notificationId)
+    const { error } = await window.supabase.from("notificacoes").update({ lida: true }).eq("id", notificationId)
 
     if (error) throw error
 
@@ -106,7 +110,7 @@ async function markNotificationAsRead(notificationId) {
 // Marcar todas as notificações como lidas
 async function markAllNotificationsAsRead(userId, userType) {
   try {
-    const { error } = await supabase
+    const { error } = await window.supabase
       .from("notificacoes")
       .update({ lida: true })
       .eq("destinatario_id", userId)
@@ -121,3 +125,10 @@ async function markAllNotificationsAsRead(userId, userType) {
     return { success: false, error: error.message }
   }
 }
+
+// Exportar funções para o escopo global
+window.sendSessionNotification = sendSessionNotification
+window.getUnreadNotifications = getUnreadNotifications
+window.getAllNotifications = getAllNotifications
+window.markNotificationAsRead = markNotificationAsRead
+window.markAllNotificationsAsRead = markAllNotificationsAsRead

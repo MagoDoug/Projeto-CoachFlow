@@ -1,11 +1,9 @@
 // Serviço para gerenciamento de feedbacks
 
-const supabase = require("supabase-js") // Declare the supabase variable
-
 // Obter todos os feedbacks de um coach
 async function getFeedbacks(coachId) {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await window.supabase
       .from("feedbacks")
       .select(`
         *,
@@ -31,7 +29,7 @@ async function getFeedbacks(coachId) {
 // Obter feedbacks de um cliente específico
 async function getClientFeedbacks(clientId) {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await window.supabase
       .from("feedbacks")
       .select(`
         *,
@@ -55,7 +53,7 @@ async function getClientFeedbacks(clientId) {
 // Obter feedback de uma sessão específica
 async function getSessionFeedback(sessionId) {
   try {
-    const { data, error } = await supabase.from("feedbacks").select("*").eq("sessao_id", sessionId).single()
+    const { data, error } = await window.supabase.from("feedbacks").select("*").eq("sessao_id", sessionId).single()
 
     if (error && error.code !== "PGRST116") throw error // PGRST116 é o código para "nenhum resultado encontrado"
 
@@ -70,7 +68,7 @@ async function getSessionFeedback(sessionId) {
 async function createFeedback(feedbackData) {
   try {
     // Verificar se o token de feedback é válido
-    const { data: sessionData, error: sessionError } = await supabase
+    const { data: sessionData, error: sessionError } = await window.supabase
       .from("sessoes")
       .select("id, coach_id, cliente_id, feedback_token")
       .eq("id", feedbackData.sessao_id)
@@ -83,7 +81,7 @@ async function createFeedback(feedbackData) {
     }
 
     // Verificar se já existe um feedback para esta sessão
-    const { data: existingFeedback, error: existingError } = await supabase
+    const { data: existingFeedback, error: existingError } = await window.supabase
       .from("feedbacks")
       .select("id")
       .eq("sessao_id", feedbackData.sessao_id)
@@ -95,7 +93,7 @@ async function createFeedback(feedbackData) {
     }
 
     // Criar o feedback
-    const { data, error } = await supabase
+    const { data, error } = await window.supabase
       .from("feedbacks")
       .insert([
         {
@@ -113,10 +111,10 @@ async function createFeedback(feedbackData) {
     if (error) throw error
 
     // Limpar o token de feedback
-    await supabase.from("sessoes").update({ feedback_token: null }).eq("id", feedbackData.sessao_id)
+    await window.supabase.from("sessoes").update({ feedback_token: null }).eq("id", feedbackData.sessao_id)
 
     // Notificar o coach sobre o novo feedback
-    const { data: coachData, error: coachError } = await supabase
+    const { data: coachData, error: coachError } = await window.supabase
       .from("coaches")
       .select("email")
       .eq("id", sessionData.coach_id)
@@ -124,7 +122,7 @@ async function createFeedback(feedbackData) {
 
     if (!coachError && coachData) {
       // Registrar notificação no banco de dados
-      await supabase.from("notificacoes").insert([
+      await window.supabase.from("notificacoes").insert([
         {
           tipo: "novo_feedback",
           destinatario_id: sessionData.coach_id,
@@ -146,7 +144,7 @@ async function createFeedback(feedbackData) {
 // Responder a um feedback
 async function respondToFeedback(feedbackId, resposta) {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await window.supabase
       .from("feedbacks")
       .update({ resposta, resposta_data: new Date() })
       .eq("id", feedbackId)
@@ -155,7 +153,7 @@ async function respondToFeedback(feedbackId, resposta) {
     if (error) throw error
 
     // Notificar o cliente sobre a resposta
-    const { data: feedbackData, error: feedbackError } = await supabase
+    const { data: feedbackData, error: feedbackError } = await window.supabase
       .from("feedbacks")
       .select(`
         cliente_id,
@@ -172,7 +170,7 @@ async function respondToFeedback(feedbackId, resposta) {
 
     if (!feedbackError && feedbackData) {
       // Registrar notificação no banco de dados
-      await supabase.from("notificacoes").insert([
+      await window.supabase.from("notificacoes").insert([
         {
           tipo: "resposta_feedback",
           destinatario_id: feedbackData.cliente_id,
@@ -190,3 +188,10 @@ async function respondToFeedback(feedbackId, resposta) {
     return { success: false, error: error.message }
   }
 }
+
+// Exportar funções para o escopo global
+window.getFeedbacks = getFeedbacks
+window.getClientFeedbacks = getClientFeedbacks
+window.getSessionFeedback = getSessionFeedback
+window.createFeedback = createFeedback
+window.respondToFeedback = respondToFeedback

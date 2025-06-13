@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="styles.css">
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="icon" href="data:,">
 </head>
 <body class="bg-gray-50">
   <div id="app">
@@ -22,14 +23,14 @@
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
   
   <script>
-    // Garantir que o Chart.js está disponível globalmente
-    window.Chart = window.Chart || Chart;
+    // Garantir que as bibliotecas estão disponíveis globalmente
+    window.supabaseClient = supabaseClient || supabase;
+    window.Chart = Chart;
+    window.emailjs = emailjs;
   </script>
   
   <!-- Configuração -->
-  <script src="js/config.js"></script>
-  
-  <!-- Utilitários -->
+  <script src="js/supabaseClient.js"></script>
   <script src="js/utils.js"></script>
   
   <!-- Componentes UI -->

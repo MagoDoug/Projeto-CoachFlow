@@ -1,12 +1,9 @@
-// Import supabase
-const supabase = require("supabase-js")
-
 // Serviço para gerenciamento de coaches
 
 // Obter perfil do coach
 async function getCoachProfile(coachId) {
   try {
-    const { data, error } = await supabase.from("coaches").select("*").eq("id", coachId).single()
+    const { data, error } = await window.supabase.from("coaches").select("*").eq("id", coachId).single()
 
     if (error) throw error
 
@@ -20,7 +17,7 @@ async function getCoachProfile(coachId) {
 // Atualizar perfil do coach
 async function updateCoachProfile(coachId, profileData) {
   try {
-    const { data, error } = await supabase.from("coaches").update(profileData).eq("id", coachId)
+    const { data, error } = await window.supabase.from("coaches").update(profileData).eq("id", coachId)
 
     if (error) throw error
 
@@ -34,7 +31,7 @@ async function updateCoachProfile(coachId, profileData) {
 // Atualizar plano do coach
 async function updateCoachPlan(coachId, plan) {
   try {
-    const { data, error } = await supabase.from("coaches").update({ plan }).eq("id", coachId)
+    const { data, error } = await window.supabase.from("coaches").update({ plan }).eq("id", coachId)
 
     if (error) throw error
 
@@ -49,12 +46,15 @@ async function updateCoachPlan(coachId, plan) {
 async function getCoachStats(coachId) {
   try {
     // Obter contagem de clientes
-    const { data: clients, error: clientsError } = await supabase.from("clientes").select("id").eq("coach_id", coachId)
+    const { data: clients, error: clientsError } = await window.supabase
+      .from("clientes")
+      .select("id")
+      .eq("coach_id", coachId)
 
     if (clientsError) throw clientsError
 
     // Obter contagem de sessões
-    const { data: sessions, error: sessionsError } = await supabase
+    const { data: sessions, error: sessionsError } = await window.supabase
       .from("sessoes")
       .select("id, cliente_id")
       .eq("coach_id", coachId)
@@ -62,7 +62,7 @@ async function getCoachStats(coachId) {
     if (sessionsError) throw sessionsError
 
     // Obter contagem de feedbacks
-    const { data: feedbacks, error: feedbacksError } = await supabase
+    const { data: feedbacks, error: feedbacksError } = await window.supabase
       .from("feedbacks")
       .select("id, rating")
       .eq("coach_id", coachId)
@@ -90,3 +90,9 @@ async function getCoachStats(coachId) {
     return { success: false, error: error.message }
   }
 }
+
+// Exportar funções para o escopo global
+window.getCoachProfile = getCoachProfile
+window.updateCoachProfile = updateCoachProfile
+window.updateCoachPlan = updateCoachPlan
+window.getCoachStats = getCoachStats
