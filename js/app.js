@@ -1,38 +1,77 @@
 // Arquivo principal da aplicação
 
+// Função para verificar se todos os serviços estão prontos
+function checkServicesReady() {
+  return (
+    typeof window.supabaseInstance !== "undefined" &&
+    typeof window.getCurrentSession === "function" &&
+    typeof window.navigateTo === "function"
+  )
+}
+
 // Aguardar o carregamento completo
 document.addEventListener("DOMContentLoaded", () => {
-  // Aguardar um pouco para garantir que o Supabase foi inicializado
-  setTimeout(() => {
-    // Verificar se o Supabase foi inicializado
-    if (!window.supabaseInstance) {
-      console.error("Supabase não foi inicializado")
-      window.navigateTo("login")
-      return
+  console.log("DOM carregado, iniciando aplicação...")
+
+  // Função para inicializar a aplicação
+  function initializeApp() {
+    if (!checkServicesReady()) {
+      console.log("Serviços ainda não estão prontos, aguardando...")
+      return false
     }
 
+    console.log("Todos os serviços prontos, verificando autenticação...")
+
     // Verificar se o usuário está autenticado
-    if (typeof window.getCurrentSession === "function") {
-      window
-        .getCurrentSession()
-        .then((result) => {
-          if (result.success && result.user) {
-            // Usuário autenticado, redirecionar para o dashboard
-            window.navigateTo("dashboard")
-          } else {
-            // Usuário não autenticado, redirecionar para o login
-            window.navigateTo("login")
-          }
-        })
-        .catch((error) => {
-          console.error("Erro ao verificar sessão:", error)
+    window
+      .getCurrentSession()
+      .then((result) => {
+        if (result.success && result.user) {
+          console.log("Usuário autenticado, redirecionando para dashboard")
+          window.navigateTo("dashboard")
+        } else {
+          console.log("Usuário não autenticado, redirecionando para login")
           window.navigateTo("login")
-        })
-    } else {
-      console.error("getCurrentSession não está disponível")
-      window.navigateTo("login")
-    }
-  }, 1500)
+        }
+      })
+      .catch((error) => {
+        console.error("Erro ao verificar sessão:", error)
+        window.navigateTo("login")
+      })
+
+    return true
+  }
+
+  // Tentar inicializar imediatamente
+  if (!initializeApp()) {
+    // Se falhar, tentar novamente com intervalos
+    let attempts = 0
+    const maxAttempts = 10
+
+    const initInterval = setInterval(() => {
+      attempts++
+      console.log(`Tentativa ${attempts} de inicialização...`)
+
+      if (initializeApp() || attempts >= maxAttempts) {
+        clearInterval(initInterval)
+        if (attempts >= maxAttempts) {
+          console.error("Falha ao inicializar aplicação após múltiplas tentativas")
+          // Mostrar página de erro ou fallback
+          document.getElementById("app").innerHTML = `
+            <div class="flex items-center justify-center h-screen">
+              <div class="text-center">
+                <h1 class="text-2xl font-bold text-red-600 mb-4">Erro ao carregar aplicação</h1>
+                <p class="text-gray-600 mb-4">Houve um problema ao inicializar a aplicação.</p>
+                <button onclick="location.reload()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                  Tentar novamente
+                </button>
+              </div>
+            </div>
+          `
+        }
+      }
+    }, 500)
+  }
 })
 
 // Definir limites do plano gratuito no escopo global

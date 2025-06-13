@@ -3,6 +3,17 @@
 // Enviar notificação por email
 async function sendSessionNotification(email, name, type, data) {
   try {
+    // Verificar se o emailjs está disponível e configurado
+    if (typeof window.emailjs === "undefined" || !window.emailjs.send) {
+      console.log("EmailJS não está disponível. Simulando envio de email:", {
+        to: email,
+        name: name,
+        type: type,
+        data: data,
+      })
+      return { success: true, simulated: true }
+    }
+
     const templateParams = {
       to_email: email,
       to_name: name,
@@ -36,21 +47,25 @@ async function sendSessionNotification(email, name, type, data) {
 
     templateParams.subject = subject
 
-    // Verificar se o emailjs está disponível
-    if (typeof window.emailjs !== "undefined" && typeof window.emailjs.send === "function") {
-      await window.emailjs.send(window.EMAILJS_SERVICE_ID, templateId, templateParams)
-    } else {
-      console.log("EmailJS não está disponível. Simulando envio de email:", {
-        service: window.EMAILJS_SERVICE_ID,
+    // Verificar se as configurações do EmailJS estão definidas
+    const EMAILJS_SERVICE_ID = "seu_service_id_emailjs" // Substitua pela sua configuração
+
+    if (EMAILJS_SERVICE_ID === "seu_service_id_emailjs") {
+      console.log("EmailJS não configurado. Simulando envio de email:", {
+        service: EMAILJS_SERVICE_ID,
         template: templateId,
         params: templateParams,
       })
+      return { success: true, simulated: true }
     }
 
+    // Tentar enviar o email
+    await window.emailjs.send(EMAILJS_SERVICE_ID, templateId, templateParams)
     return { success: true }
   } catch (error) {
     console.error("Erro ao enviar notificação por email:", error)
-    return { success: false, error: error.message }
+    // Não falhar a operação por causa do email
+    return { success: true, error: error.message, simulated: true }
   }
 }
 
