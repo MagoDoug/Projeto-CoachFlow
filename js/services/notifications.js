@@ -1,18 +1,24 @@
 // Serviço para gerenciamento de notificações
 
-// Verificar se EmailJS está configurado corretamente
+// Verificar se EmailJS está configurado corretamente - VERSÃO MAIS PERMISSIVA
 function isEmailJSConfigured() {
-  // Usar as configurações do arquivo de config
   const config = window.EMAILJS_CONFIG || {}
 
-  return (
-    typeof window.emailjs !== "undefined" &&
-    config.ENABLED === true &&
-    config.SERVICE_ID &&
-    config.SERVICE_ID !== "service_coachflow" && // Não é a configuração padrão
-    config.PUBLIC_KEY &&
-    config.PUBLIC_KEY !== "mH4Lr2yeMa_QJpkRa" // Não é a chave padrão
-  )
+  // Verificar se EmailJS está disponível e tem configurações básicas
+  const emailJSAvailable = typeof window.emailjs !== "undefined"
+  const hasServiceId = config.SERVICE_ID && config.SERVICE_ID.length > 0
+  const hasPublicKey = config.PUBLIC_KEY && config.PUBLIC_KEY.length > 0
+
+  const isConfigured = emailJSAvailable && config.ENABLED === true && hasServiceId && hasPublicKey
+
+  console.log("🔍 Verificação detalhada do EmailJS:")
+  console.log("- EmailJS carregado:", emailJSAvailable)
+  console.log("- Configuração habilitada:", config.ENABLED)
+  console.log("- Service ID presente:", hasServiceId, "(" + config.SERVICE_ID + ")")
+  console.log("- Public Key presente:", hasPublicKey)
+  console.log("- Resultado final:", isConfigured ? "✅ CONFIGURADO" : "❌ NÃO CONFIGURADO")
+
+  return isConfigured
 }
 
 // Inicializar EmailJS se disponível
@@ -22,46 +28,49 @@ function initializeEmailJS() {
 
     if (typeof window.emailjs !== "undefined" && window.emailjs.init && config.PUBLIC_KEY) {
       window.emailjs.init(config.PUBLIC_KEY)
-      console.log("EmailJS inicializado com sucesso")
+      console.log("✅ EmailJS inicializado com sucesso com a chave:", config.PUBLIC_KEY)
       return true
     } else {
-      console.log("EmailJS não está disponível ou chave pública não configurada")
+      console.log("❌ EmailJS não pode ser inicializado:")
+      console.log("- EmailJS disponível:", typeof window.emailjs !== "undefined")
+      console.log("- Método init disponível:", !!(window.emailjs && window.emailjs.init))
+      console.log("- Public Key disponível:", !!config.PUBLIC_KEY)
       return false
     }
   } catch (error) {
-    console.warn("Erro ao inicializar EmailJS:", error)
+    console.warn("❌ Erro ao inicializar EmailJS:", error)
     return false
   }
 }
 
 // Enviar notificação por email
 async function sendSessionNotification(email, name, type, data) {
-  console.log("Tentando enviar notificação por email:", { email, name, type, data })
+  console.log("📧 === INICIANDO ENVIO DE EMAIL ===")
+  console.log("Parâmetros recebidos:", { email, name, type, data })
 
   try {
     const config = window.EMAILJS_CONFIG || {}
 
     // Verificar se o EmailJS está disponível e configurado
-    if (!isEmailJSConfigured()) {
-      console.log("EmailJS não está configurado corretamente. Simulando envio de email:", {
-        to: email,
-        name: name,
-        type: type,
-        data: data,
-        reason: "Configuração incompleta - usando configurações padrão ou EmailJS desabilitado",
-        currentConfig: {
-          enabled: config.ENABLED,
-          hasServiceId: !!config.SERVICE_ID,
-          hasPublicKey: !!config.PUBLIC_KEY,
-          serviceId: config.SERVICE_ID,
-        },
+    const isConfigured = isEmailJSConfigured()
+
+    if (!isConfigured) {
+      console.log("❌ EmailJS não está configurado. Detalhes:")
+      console.log("- Config atual:", {
+        enabled: config.ENABLED,
+        serviceId: config.SERVICE_ID,
+        hasPublicKey: !!config.PUBLIC_KEY,
+        emailJSLoaded: typeof window.emailjs !== "undefined",
       })
+
+      // Simular envio
+      console.log("🔄 Simulando envio de email...")
       return { success: true, simulated: true, reason: "EmailJS não configurado completamente" }
     }
 
     // Inicializar EmailJS se necessário
     if (!initializeEmailJS()) {
-      console.log("Falha ao inicializar EmailJS. Simulando envio.")
+      console.log("❌ Falha ao inicializar EmailJS. Simulando envio.")
       return { success: true, simulated: true, reason: "Falha na inicialização" }
     }
 
@@ -80,7 +89,7 @@ async function sendSessionNotification(email, name, type, data) {
       if (data.feedback_link) templateParams.feedback_link = String(data.feedback_link)
     }
 
-    const templateId = config.TEMPLATES[type] || config.TEMPLATES.padrao || "template_padrao"
+    const templateId = config.TEMPLATES[type] || config.TEMPLATES.padrao || "template_igrngdo"
     let subject = ""
     let message = ""
 
@@ -112,36 +121,33 @@ async function sendSessionNotification(email, name, type, data) {
     templateParams.subject = subject
     templateParams.message = message
 
-    console.log("Enviando email com parâmetros:", templateParams)
-    console.log("Usando configuração:", {
-      serviceId: config.SERVICE_ID,
-      templateId: templateId,
-      publicKey: config.PUBLIC_KEY ? "***configurado***" : "não configurado",
-    })
+    console.log("📧 Preparando envio real do email:")
+    console.log("- Template ID:", templateId)
+    console.log("- Service ID:", config.SERVICE_ID)
+    console.log("- Parâmetros:", templateParams)
 
     // Tentar enviar o email com timeout
+    console.log("🚀 Enviando email via EmailJS...")
+
     const emailPromise = window.emailjs.send(config.SERVICE_ID, templateId, templateParams)
 
-    // Adicionar timeout de 10 segundos
+    // Adicionar timeout de 15 segundos
     const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error("Timeout: Email demorou mais de 10 segundos para enviar")), 10000)
+      setTimeout(() => reject(new Error("Timeout: Email demorou mais de 15 segundos para enviar")), 15000)
     })
 
     const response = await Promise.race([emailPromise, timeoutPromise])
 
-    console.log("Email enviado com sucesso:", response)
-    return { success: true, response }
-  } catch (error) {
-    console.warn("Erro ao enviar notificação por email:", error)
+    console.log("✅ Email enviado com sucesso!")
+    console.log("Resposta do EmailJS:", response)
 
-    // Simular envio bem-sucedido para não quebrar o fluxo
-    console.log("Simulando envio de email devido ao erro:", {
-      to: email,
-      name: name,
-      type: type,
-      data: data,
-      error: error.message,
-    })
+    return { success: true, response, sent: true }
+  } catch (error) {
+    console.error("❌ Erro ao enviar email:", error)
+    console.error("Stack trace:", error.stack)
+
+    // Em caso de erro, simular para não quebrar o fluxo
+    console.log("🔄 Simulando envio devido ao erro")
 
     return {
       success: true,
@@ -227,8 +233,14 @@ async function markAllNotificationsAsRead(userId, userType) {
 // Inicializar EmailJS quando o documento carregar
 document.addEventListener("DOMContentLoaded", () => {
   setTimeout(() => {
-    initializeEmailJS()
-  }, 1000)
+    console.log("🔄 Inicializando EmailJS após carregamento da página...")
+    const initialized = initializeEmailJS()
+    if (initialized) {
+      console.log("✅ EmailJS pronto para uso!")
+    } else {
+      console.log("⚠️ EmailJS não foi inicializado corretamente")
+    }
+  }, 2000) // Aumentar o delay para 2 segundos
 })
 
 // Exportar funções para o escopo global

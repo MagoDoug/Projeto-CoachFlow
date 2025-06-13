@@ -11,7 +11,7 @@ window.EMAILJS_CONFIG = {
     sessao_atualizada: "template_sessao_atualizada",
     sessao_cancelada: "template_sessao_cancelada",
     solicitar_feedback: "template_igrngdo",
-    padrao: "template_padrao",
+    padrao: "template_igrngdo", // Usar o template de feedback como padrão
   },
 
   // Configurações adicionais
@@ -46,31 +46,39 @@ window.EMAILJS_CONFIG = {
   },
 }
 
-// Função para verificar se está configurado
+// Função para verificar se está configurado - VERSÃO MAIS PERMISSIVA
 window.checkEmailJSConfiguration = () => {
   const config = window.EMAILJS_CONFIG
 
-  // Verificar se as configurações são diferentes dos valores padrão
-  const hasValidServiceId = config.SERVICE_ID && config.SERVICE_ID !== "service_ik0b5tp"
-  const hasValidPublicKey = config.PUBLIC_KEY && config.PUBLIC_KEY !== "mH4Lr2yeMa_QJpkRa"
+  // Verificar se EmailJS está disponível
+  const emailJSAvailable = typeof window.emailjs !== "undefined"
 
-  const isConfigured = config.ENABLED && (hasValidServiceId || hasValidPublicKey)
+  // Verificar se tem configurações básicas (mesmo que sejam as padrão para teste)
+  const hasServiceId = config.SERVICE_ID && config.SERVICE_ID.length > 0
+  const hasPublicKey = config.PUBLIC_KEY && config.PUBLIC_KEY.length > 0
 
-  console.log("📧 Verificando configuração EmailJS:")
+  const isConfigured = config.ENABLED && emailJSAvailable && hasServiceId && hasPublicKey
+
+  console.log("📧 Verificando configuração EmailJS (modo permissivo):")
+  console.log("- EmailJS disponível:", emailJSAvailable)
   console.log("- Habilitado:", config.ENABLED)
   console.log("- Service ID:", config.SERVICE_ID)
-  console.log("- Service ID válido:", hasValidServiceId ? "✅ Personalizado" : "⚠️ Padrão")
-  console.log("- Public Key válida:", hasValidPublicKey ? "✅ Personalizada" : "⚠️ Padrão")
+  console.log("- Public Key:", hasPublicKey ? "***configurado***" : "não configurado")
+  console.log("- Configuração válida:", isConfigured)
 
   if (!isConfigured) {
-    console.log("⚠️ EmailJS usando configurações padrão.")
-    console.log("Para usar suas configurações reais:")
-    console.log("1. Configure as variáveis de ambiente no Vercel:")
-    console.log("   - EMAILJS_SERVICE_ID")
-    console.log("   - EMAILJS_PUBLIC_KEY")
-    console.log("2. Faça um novo deploy")
+    console.log("⚠️ EmailJS não está configurado corretamente.")
+    if (!emailJSAvailable) {
+      console.log("- EmailJS não foi carregado")
+    }
+    if (!hasServiceId) {
+      console.log("- Service ID não encontrado")
+    }
+    if (!hasPublicKey) {
+      console.log("- Public Key não encontrada")
+    }
   } else {
-    console.log("✅ EmailJS configurado com suas credenciais!")
+    console.log("✅ EmailJS configurado e pronto para uso!")
   }
 
   return isConfigured
