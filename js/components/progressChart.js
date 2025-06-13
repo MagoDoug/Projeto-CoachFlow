@@ -1,5 +1,17 @@
+import { ChartStyle } from "@/components/ui/chart"
+import { ChartLegendContent } from "@/components/ui/chart"
+import { ChartLegend } from "@/components/ui/chart"
+import { ChartTooltipContent } from "@/components/ui/chart"
+import { ChartTooltip } from "@/components/ui/chart"
+import { ChartContainer } from "@/components/ui/chart"
 import { Chart } from "@/components/ui/chart"
 // Componente de gráfico de progresso
+
+// Não precisamos importar Chart, pois já está disponível globalmente via CDN
+// import {
+Chart, ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent, ChartStyle
+\
+} from "@/components/ui/chart"
 
 function createProgressChart(clientId, containerId) {
   // Criar o container para o gráfico
