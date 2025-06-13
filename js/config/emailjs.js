@@ -7,10 +7,10 @@ window.EMAILJS_CONFIG = {
 
   // IDs dos templates que você criou no EmailJS
   TEMPLATES: {
-    nova_sessao: "template_nova_sessao",
+    nova_sessao: "template_1835qcl",
     sessao_atualizada: "template_sessao_atualizada",
     sessao_cancelada: "template_sessao_cancelada",
-    solicitar_feedback: "template_solicitar_feedback",
+    solicitar_feedback: "template_igrngdo",
     padrao: "template_padrao",
   },
 
