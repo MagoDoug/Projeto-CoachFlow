@@ -109,9 +109,14 @@ async function createSession(coachId, sessionData) {
         .single()
 
       if (!clientError && clientData) {
+        // Formatar data e hora corretamente
+        const sessionDate = new Date(sessionData.data)
+        const formattedDate = sessionDate.toLocaleDateString("pt-BR")
+        const formattedTime = sessionDate.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })
+
         await window.sendSessionNotification(clientData.email, clientData.nome, "nova_sessao", {
-          data: window.formatDate(sessionData.data),
-          hora: window.formatTime(sessionData.data),
+          data: formattedDate,
+          hora: formattedTime,
           titulo: sessionData.titulo,
         })
 
@@ -121,7 +126,7 @@ async function createSession(coachId, sessionData) {
             tipo: "nova_sessao",
             destinatario_id: sessionData.cliente_id,
             destinatario_tipo: "cliente",
-            conteudo: `Nova sessão agendada: ${sessionData.titulo} para ${window.formatDate(sessionData.data)} às ${window.formatTime(sessionData.data)}`,
+            conteudo: `Nova sessão agendada: ${sessionData.titulo} para ${formattedDate} às ${formattedTime}`,
             lida: false,
             created_at: new Date(),
           },
@@ -165,13 +170,18 @@ async function updateSession(sessionId, sessionData) {
         .single()
 
       if (!sessionError && sessionInfo) {
+        // Formatar data e hora corretamente
+        const sessionDate = new Date(sessionData.data)
+        const formattedDate = sessionDate.toLocaleDateString("pt-BR")
+        const formattedTime = sessionDate.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })
+
         await window.sendSessionNotification(
           sessionInfo.clientes.email,
           sessionInfo.clientes.nome,
           "sessao_atualizada",
           {
-            data: window.formatDate(sessionData.data),
-            hora: window.formatTime(sessionData.data),
+            data: formattedDate,
+            hora: formattedTime,
             titulo: sessionData.titulo,
           },
         )
@@ -182,7 +192,7 @@ async function updateSession(sessionId, sessionData) {
             tipo: "sessao_atualizada",
             destinatario_id: sessionInfo.cliente_id,
             destinatario_tipo: "cliente",
-            conteudo: `Sessão atualizada: ${sessionData.titulo} para ${window.formatDate(sessionData.data)} às ${window.formatTime(sessionData.data)}`,
+            conteudo: `Sessão atualizada: ${sessionData.titulo} para ${formattedDate} às ${formattedTime}`,
             lida: false,
             created_at: new Date(),
           },
@@ -234,14 +244,19 @@ async function deleteSession(sessionId) {
     // Enviar notificação ao cliente sobre o cancelamento da sessão
     try {
       if (!sessionError && sessionInfo) {
+        // Formatar data e hora corretamente
+        const sessionDate = new Date(sessionInfo.data)
+        const formattedDate = sessionDate.toLocaleDateString("pt-BR")
+        const formattedTime = sessionDate.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })
+
         await window.sendSessionNotification(
           sessionInfo.clientes.email,
           sessionInfo.clientes.nome,
           "sessao_cancelada",
           {
             titulo: sessionInfo.titulo,
-            data: window.formatDate(sessionInfo.data),
-            hora: window.formatTime(sessionInfo.data),
+            data: formattedDate,
+            hora: formattedTime,
           },
         )
 
@@ -251,7 +266,7 @@ async function deleteSession(sessionId) {
             tipo: "sessao_cancelada",
             destinatario_id: sessionInfo.cliente_id,
             destinatario_tipo: "cliente",
-            conteudo: `Sessão cancelada: ${sessionInfo.titulo} que estava agendada para ${window.formatDate(sessionInfo.data)} às ${window.formatTime(sessionInfo.data)}`,
+            conteudo: `Sessão cancelada: ${sessionInfo.titulo} que estava agendada para ${formattedDate} às ${formattedTime}`,
             lida: false,
             created_at: new Date(),
           },
@@ -332,15 +347,17 @@ async function requestSessionFeedback(sessionId) {
 
     console.log("Token de feedback gerado/obtido:", feedbackToken)
 
-    // Enviar email solicitando feedback
+    // Enviar email solicitando feedback com dados formatados corretamente
     try {
+      const feedbackLink = `${window.location.origin}/feedback?token=${feedbackToken}&session=${sessionId}`
+
       await window.sendSessionNotification(
         sessionInfo.clientes.email,
         sessionInfo.clientes.nome,
         "solicitar_feedback",
         {
           titulo: sessionInfo.titulo,
-          feedback_link: `${window.location.origin}/feedback?token=${feedbackToken}&session=${sessionId}`,
+          feedback_link: feedbackLink,
         },
       )
       console.log("Email de solicitação de feedback enviado")

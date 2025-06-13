@@ -62,44 +62,64 @@ async function sendSessionNotification(email, name, type, data) {
       return { success: true, simulated: true, reason: "Falha na inicialização" }
     }
 
+    // Construir parâmetros do template de forma segura
     const templateParams = {
-      to_email: email,
-      to_name: name,
+      to_email: String(email || ""),
+      to_name: String(name || ""),
       from_name: "CoachFlow",
-      ...data,
+    }
+
+    // Adicionar dados específicos baseados no tipo, garantindo que são strings
+    if (data && typeof data === "object") {
+      if (data.data) templateParams.data = String(data.data)
+      if (data.hora) templateParams.hora = String(data.hora)
+      if (data.titulo) templateParams.titulo = String(data.titulo)
+      if (data.feedback_link) templateParams.feedback_link = String(data.feedback_link)
     }
 
     const templateId = EMAILJS_CONFIG.TEMPLATES[type] || EMAILJS_CONFIG.TEMPLATES.padrao
     let subject = ""
+    let message = ""
 
     switch (type) {
       case "nova_sessao":
         subject = "Nova sessão agendada - CoachFlow"
-        templateParams.message = `Olá ${name}, uma nova sessão foi agendada para ${data.data} às ${data.hora}. Título: ${data.titulo}`
+        message = `Olá ${templateParams.to_name}, uma nova sessão foi agendada para ${templateParams.data || "data não informada"} às ${templateParams.hora || "hora não informada"}. Título: ${templateParams.titulo || "título não informado"}`
         break
       case "sessao_atualizada":
         subject = "Sessão atualizada - CoachFlow"
-        templateParams.message = `Olá ${name}, sua sessão foi atualizada para ${data.data} às ${data.hora}. Título: ${data.titulo}`
+        message = `Olá ${templateParams.to_name}, sua sessão foi atualizada para ${templateParams.data || "data não informada"} às ${templateParams.hora || "hora não informada"}. Título: ${templateParams.titulo || "título não informado"}`
         break
       case "sessao_cancelada":
         subject = "Sessão cancelada - CoachFlow"
-        templateParams.message = `Olá ${name}, a sessão "${data.titulo}" agendada para ${data.data} às ${data.hora} foi cancelada.`
+        message = `Olá ${templateParams.to_name}, a sessão "${templateParams.titulo || "título não informado"}" agendada para ${templateParams.data || "data não informada"} às ${templateParams.hora || "hora não informada"} foi cancelada.`
         break
       case "solicitar_feedback":
         subject = "Solicitação de feedback - CoachFlow"
-        templateParams.message = `Olá ${name}, gostaríamos de receber seu feedback sobre a sessão "${data.titulo}". Acesse: ${data.feedback_link}`
+        message = `Olá ${templateParams.to_name}, gostaríamos de receber seu feedback sobre a sessão "${templateParams.titulo || "título não informado"}".`
+        if (templateParams.feedback_link) {
+          message += ` Acesse: ${templateParams.feedback_link}`
+        }
         break
       default:
         subject = "Notificação CoachFlow"
-        templateParams.message = `Olá ${name}, você tem uma nova notificação do CoachFlow.`
+        message = `Olá ${templateParams.to_name}, você tem uma nova notificação do CoachFlow.`
     }
 
     templateParams.subject = subject
+    templateParams.message = message
 
     console.log("Enviando email com parâmetros:", templateParams)
 
-    // Tentar enviar o email
-    const response = await window.emailjs.send(EMAILJS_CONFIG.SERVICE_ID, templateId, templateParams)
+    // Tentar enviar o email com timeout
+    const emailPromise = window.emailjs.send(EMAILJS_CONFIG.SERVICE_ID, templateId, templateParams)
+
+    // Adicionar timeout de 10 segundos
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error("Timeout: Email demorou mais de 10 segundos para enviar")), 10000)
+    })
+
+    const response = await Promise.race([emailPromise, timeoutPromise])
 
     console.log("Email enviado com sucesso:", response)
     return { success: true, response }
