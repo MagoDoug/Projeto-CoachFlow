@@ -1,27 +1,31 @@
 // Serviço para gerenciamento de notificações
 
-// Configuração do EmailJS
-const EMAILJS_CONFIG = {
-  SERVICE_ID: "service_coachflow", // Substitua pelo seu service ID
-  PUBLIC_KEY: "mH4Lr2yeMa_QJpkRa", // Substitua pela sua chave pública
-  TEMPLATES: {
-    nova_sessao: "template_nova_sessao",
-    sessao_atualizada: "template_sessao_atualizada",
-    sessao_cancelada: "template_sessao_cancelada",
-    solicitar_feedback: "template_solicitar_feedback",
-    padrao: "template_padrao",
-  },
+// Verificar se EmailJS está configurado corretamente
+function isEmailJSConfigured() {
+  // Usar as configurações do arquivo de config
+  const config = window.EMAILJS_CONFIG || {}
+
+  return (
+    typeof window.emailjs !== "undefined" &&
+    config.ENABLED === true &&
+    config.SERVICE_ID &&
+    config.SERVICE_ID !== "service_coachflow" && // Não é a configuração padrão
+    config.PUBLIC_KEY &&
+    config.PUBLIC_KEY !== "mH4Lr2yeMa_QJpkRa" // Não é a chave padrão
+  )
 }
 
 // Inicializar EmailJS se disponível
 function initializeEmailJS() {
   try {
-    if (typeof window.emailjs !== "undefined" && window.emailjs.init) {
-      window.emailjs.init(EMAILJS_CONFIG.PUBLIC_KEY)
+    const config = window.EMAILJS_CONFIG || {}
+
+    if (typeof window.emailjs !== "undefined" && window.emailjs.init && config.PUBLIC_KEY) {
+      window.emailjs.init(config.PUBLIC_KEY)
       console.log("EmailJS inicializado com sucesso")
       return true
     } else {
-      console.log("EmailJS não está disponível")
+      console.log("EmailJS não está disponível ou chave pública não configurada")
       return false
     }
   } catch (error) {
@@ -30,20 +34,13 @@ function initializeEmailJS() {
   }
 }
 
-// Verificar se EmailJS está configurado corretamente
-function isEmailJSConfigured() {
-  return (
-    typeof window.emailjs !== "undefined" &&
-    EMAILJS_CONFIG.PUBLIC_KEY !== "mH4Lr2yeMa_QJpkRa" && // Chave padrão não configurada
-    EMAILJS_CONFIG.SERVICE_ID !== "service_coachflow" // Service ID padrão não configurado
-  )
-}
-
 // Enviar notificação por email
 async function sendSessionNotification(email, name, type, data) {
   console.log("Tentando enviar notificação por email:", { email, name, type, data })
 
   try {
+    const config = window.EMAILJS_CONFIG || {}
+
     // Verificar se o EmailJS está disponível e configurado
     if (!isEmailJSConfigured()) {
       console.log("EmailJS não está configurado corretamente. Simulando envio de email:", {
@@ -51,9 +48,15 @@ async function sendSessionNotification(email, name, type, data) {
         name: name,
         type: type,
         data: data,
-        reason: "Configuração incompleta - chaves padrão detectadas",
+        reason: "Configuração incompleta - usando configurações padrão ou EmailJS desabilitado",
+        currentConfig: {
+          enabled: config.ENABLED,
+          hasServiceId: !!config.SERVICE_ID,
+          hasPublicKey: !!config.PUBLIC_KEY,
+          serviceId: config.SERVICE_ID,
+        },
       })
-      return { success: true, simulated: true, reason: "EmailJS não configurado" }
+      return { success: true, simulated: true, reason: "EmailJS não configurado completamente" }
     }
 
     // Inicializar EmailJS se necessário
@@ -77,7 +80,7 @@ async function sendSessionNotification(email, name, type, data) {
       if (data.feedback_link) templateParams.feedback_link = String(data.feedback_link)
     }
 
-    const templateId = EMAILJS_CONFIG.TEMPLATES[type] || EMAILJS_CONFIG.TEMPLATES.padrao
+    const templateId = config.TEMPLATES[type] || config.TEMPLATES.padrao || "template_padrao"
     let subject = ""
     let message = ""
 
@@ -110,9 +113,14 @@ async function sendSessionNotification(email, name, type, data) {
     templateParams.message = message
 
     console.log("Enviando email com parâmetros:", templateParams)
+    console.log("Usando configuração:", {
+      serviceId: config.SERVICE_ID,
+      templateId: templateId,
+      publicKey: config.PUBLIC_KEY ? "***configurado***" : "não configurado",
+    })
 
     // Tentar enviar o email com timeout
-    const emailPromise = window.emailjs.send(EMAILJS_CONFIG.SERVICE_ID, templateId, templateParams)
+    const emailPromise = window.emailjs.send(config.SERVICE_ID, templateId, templateParams)
 
     // Adicionar timeout de 10 segundos
     const timeoutPromise = new Promise((_, reject) => {

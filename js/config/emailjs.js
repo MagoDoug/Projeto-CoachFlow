@@ -1,17 +1,9 @@
 // Configuração do EmailJS para CoachFlow
 
-// INSTRUÇÕES PARA CONFIGURAR O EMAILJS:
-// 1. Acesse https://dashboard.emailjs.com/
-// 2. Crie uma conta ou faça login
-// 3. Crie um novo serviço de email
-// 4. Obtenha sua chave pública em Account > General
-// 5. Crie templates de email para cada tipo de notificação
-// 6. Substitua os valores abaixo pelas suas configurações reais
-
 window.EMAILJS_CONFIG = {
   // Suas configurações reais do EmailJS
   SERVICE_ID: "service_ik0b5tp", // Seu service ID real
-  PUBLIC_KEY: "mH4Lr2yeMa_QJpkRa", // Sua chave pública real
+  PUBLIC_KEY: "YOUR_ACTUAL_PUBLIC_KEY_HERE", // Substitua pela sua chave pública real do EmailJS
 
   // IDs dos templates que você criou no EmailJS
   TEMPLATES: {
@@ -63,17 +55,23 @@ window.checkEmailJSConfiguration = () => {
     config.SERVICE_ID &&
     config.SERVICE_ID !== "service_coachflow" &&
     config.PUBLIC_KEY &&
-    config.PUBLIC_KEY !== "sua_chave_publica_aqui"
+    config.PUBLIC_KEY !== "YOUR_ACTUAL_PUBLIC_KEY_HERE" &&
+    config.PUBLIC_KEY !== "mH4Lr2yeMa_QJpkRa"
 
   if (!isConfigured) {
-    console.log("📧 EmailJS não está configurado.")
-    console.log("Para configurar:")
+    console.log("📧 EmailJS não está totalmente configurado.")
+    console.log("Para configurar completamente:")
     console.log("1. Acesse https://dashboard.emailjs.com/")
-    console.log("2. Configure seu serviço de email")
-    console.log("3. Atualize o arquivo js/config/emailjs.js")
-    console.log("4. Mude ENABLED para true")
+    console.log("2. Vá em Account > General e copie sua Public Key")
+    console.log("3. Substitua 'YOUR_ACTUAL_PUBLIC_KEY_HERE' pela sua chave real")
+    console.log("4. Crie os templates de email necessários")
+    console.log("Configuração atual:", {
+      enabled: config.ENABLED,
+      serviceId: config.SERVICE_ID,
+      publicKey: config.PUBLIC_KEY === "YOUR_ACTUAL_PUBLIC_KEY_HERE" ? "Precisa ser configurado" : "Configurado",
+    })
   } else {
-    console.log("📧 EmailJS configurado e habilitado")
+    console.log("📧 EmailJS totalmente configurado e habilitado")
   }
 
   return isConfigured
@@ -83,4 +81,7 @@ window.checkEmailJSConfiguration = () => {
 console.log("📧 Configuração EmailJS carregada")
 console.log("Status:", window.EMAILJS_CONFIG.ENABLED ? "Habilitado" : "Desabilitado")
 console.log("Service ID:", window.EMAILJS_CONFIG.SERVICE_ID)
-console.log("Public Key:", window.EMAILJS_CONFIG.PUBLIC_KEY ? "Configurado" : "Não configurado")
+console.log(
+  "Public Key:",
+  window.EMAILJS_CONFIG.PUBLIC_KEY === "YOUR_ACTUAL_PUBLIC_KEY_HERE" ? "Precisa ser configurado" : "Configurado",
+)
