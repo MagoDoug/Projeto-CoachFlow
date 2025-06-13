@@ -7,11 +7,11 @@ window.EMAILJS_CONFIG = {
 
   // IDs dos templates que você criou no EmailJS - CORRIGIDOS
   TEMPLATES: {
-    nova_sessao: "template_1835qcl", // Este existe
-    sessao_atualizada: "template_1835qcl", // Usar o mesmo template
-    sessao_cancelada: "template_1835qcl", // Usar o mesmo template
-    solicitar_feedback: "template_1835qcl", // Usar o template que existe
-    padrao: "template_1835qcl", // Usar o template que existe
+    nova_sessao: "template_eew5s4g", 
+    sessao_atualizada: "template_eew5s4g", 
+    sessao_cancelada: "template_eew5s4g", 
+    solicitar_feedback: "template_atnetkl", 
+    padrao: "template_eew5s4g", 
   },
 
   // Configurações adicionais
