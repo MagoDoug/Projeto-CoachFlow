@@ -124,7 +124,9 @@ function createSessionCard(session, showActions = true) {
     if (editBtn) {
       editBtn.addEventListener("click", (e) => {
         e.stopPropagation()
-        window.editSession(session.id) // Assuming editSession is a global function
+        if (typeof window.editSession === "function") {
+          window.editSession(session.id)
+        }
       })
     }
 
@@ -134,7 +136,9 @@ function createSessionCard(session, showActions = true) {
       deleteBtn.addEventListener("click", (e) => {
         e.stopPropagation()
         if (confirm("Tem certeza que deseja excluir esta sessão?")) {
-          window.deleteSession(session.id) // Assuming deleteSession is a global function
+          if (typeof window.deleteSession === "function") {
+            window.deleteSession(session.id)
+          }
         }
       })
     }
@@ -144,13 +148,17 @@ function createSessionCard(session, showActions = true) {
     if (requestFeedbackBtn) {
       requestFeedbackBtn.addEventListener("click", (e) => {
         e.stopPropagation()
-        window.requestSessionFeedback(session.id) // Assuming requestSessionFeedback is a global function
+        if (typeof window.requestSessionFeedback === "function") {
+          window.requestSessionFeedback(session.id)
+        }
       })
     }
 
     // Clicar no card para ver detalhes
     card.addEventListener("click", () => {
-      window.viewSessionDetails(session.id) // Assuming viewSessionDetails is a global function
+      if (typeof window.viewSessionDetails === "function") {
+        window.viewSessionDetails(session.id)
+      }
     })
   }
 

@@ -2,24 +2,24 @@
 
 function renderSessionsPage() {
   const appContainer = document.getElementById("app")
-  
+
   // Verificar se o usuário está autenticado
   window.getCurrentSession().then(async (result) => {
     if (!result.success || !result.user) {
       window.navigateTo("login")
       return
     }
-    
+
     const currentUser = result.user
-    
+
     // Obter sessões do coach
     const sessionsResult = await window.getSessions(currentUser.id)
     const sessions = sessionsResult.success ? sessionsResult.sessions : []
-    
+
     // Obter clientes para o modal de nova sessão
     const clientsResult = await window.getClients(currentUser.id)
     const clients = clientsResult.success ? clientsResult.clients : []
-    
+
     // Renderizar a página
     appContainer.innerHTML = `
       <div class="flex flex-col min-h-screen bg-gray-50">
@@ -57,7 +57,7 @@ function renderSessionsPage() {
                     <label for="client-filter" class="block text-sm font-medium text-gray-700 mb-1">Cliente:</label>
                     <select id="client-filter" class="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
                       <option value="all">Todos os clientes</option>
-                      ${clients.map(client => `<option value="${client.id}">${client.nome}</option>`).join('')}
+                      ${clients.map((client) => `<option value="${client.id}">${client.nome}</option>`).join("")}
                     </select>
                   </div>
                 </div>
@@ -82,88 +82,92 @@ function renderSessionsPage() {
         </div>
       </div>
     `
-    
+
     // Renderizar navbar e sidebar
     const navbarContainer = document.getElementById("navbar-container")
-    navbarContainer.appendChild(window.createNavbar(currentUser, window.navigateTo, window.logoutCoach, window.getUnreadNotifications))
-    
+    navbarContainer.appendChild(
+      window.createNavbar(currentUser, window.navigateTo, window.logoutCoach, window.getUnreadNotifications),
+    )
+
     const sidebarContainer = document.getElementById("sidebar-container")
     sidebarContainer.appendChild(window.createSidebar(currentUser))
-    
+
     // Renderizar sessões
     const sessionsContainer = document.getElementById("sessions-container")
-    sessions.forEach(session => {
+    sessions.forEach((session) => {
       sessionsContainer.appendChild(window.createSessionCard(session))
     })
-    
+
     // Adicionar event listeners
     document.getElementById("add-session-btn")?.addEventListener("click", () => {
       window.showAddSessionModal()
     })
-    
+
     // Filtro e pesquisa
     const filterSelect = document.getElementById("filter")
     const clientFilterSelect = document.getElementById("client-filter")
     const searchInput = document.getElementById("search")
-    
+
     filterSelect.addEventListener("change", filterAndSearchSessions)
     clientFilterSelect.addEventListener("change", filterAndSearchSessions)
     searchInput.addEventListener("input", filterAndSearchSessions)
-    
+
     function filterAndSearchSessions() {
       const filterValue = filterSelect.value
       const clientFilterValue = clientFilterSelect.value
       const searchValue = searchInput.value.toLowerCase()
-      
+
       // Limpar container
       sessionsContainer.innerHTML = ""
-      
+
       // Filtrar e ordenar sessões
       let filteredSessions = [...sessions]
-      
+
       // Aplicar filtro de cliente
       if (clientFilterValue !== "all") {
-        filteredSessions = filteredSessions.filter(session => session.cliente_id === clientFilterValue)
+        filteredSessions = filteredSessions.filter((session) => session.cliente_id === clientFilterValue)
       }
-      
+
       // Aplicar filtro de pesquisa
       if (searchValue) {
-        filteredSessions = filteredSessions.filter(session => 
-          session.titulo.toLowerCase().includes(searchValue) || 
-          (session.notas && session.notas.toLowerCase().includes(searchValue))
+        filteredSessions = filteredSessions.filter(
+          (session) =>
+            session.titulo.toLowerCase().includes(searchValue) ||
+            (session.notas && session.notas.toLowerCase().includes(searchValue)),
         )
       }
-      
+
       // Aplicar filtro de tipo
       const now = new Date()
       switch (filterValue) {
         case "upcoming":
-          filteredSessions = filteredSessions.filter(session => new Date(session.data) > now)
+          filteredSessions = filteredSessions.filter((session) => new Date(session.data) > now)
           filteredSessions.sort((a, b) => new Date(a.data) - new Date(b.data))
           break
         case "past":
-          filteredSessions = filteredSessions.filter(session => new Date(session.data) <= now)
+          filteredSessions = filteredSessions.filter((session) => new Date(session.data) <= now)
           filteredSessions.sort((a, b) => new Date(b.data) - new Date(a.data))
           break
         case "feedback":
-          filteredSessions = filteredSessions.filter(session => session.feedback && session.feedback.id)
+          filteredSessions = filteredSessions.filter((session) => session.feedback && session.feedback.id)
           break
         case "no-feedback":
-          filteredSessions = filteredSessions.filter(session => 
-            new Date(session.data) <= now && (!session.feedback || !session.feedback.id)
+          filteredSessions = filteredSessions.filter(
+            (session) => new Date(session.data) <= now && (!session.feedback || !session.feedback.id),
           )
           break
         default:
           filteredSessions.sort((a, b) => new Date(b.data) - new Date(a.data))
       }
-      
+
       // Renderizar sessões filtradas
       if (filteredSessions.length > 0) {
-        filteredSessions.forEach(session => {
+        filteredSessions.forEach((session) => {
           sessionsContainer.appendChild(window.createSessionCard(session))
         })
       } else {
-        sessionsContainer.innerHTML = '<div class="text-center py-12"><p class="text-gray-500">Nenhuma sessão encontrada.</p></div>'
+        sessionsContainer.innerHTML =
+          '<div class="text-center py-12"><p class="text-gray-500">Nenhuma sessão encontrada.</p></div>'
       }
     }
   })
@@ -177,26 +181,26 @@ function showAddSessionModal() {
       window.navigateTo("login")
       return
     }
-    
+
     const currentUser = result.user
-    
+
     // Obter clientes do coach
     const clientsResult = await window.getClients(currentUser.id)
     const clients = clientsResult.success ? clientsResult.clients : []
-    
+
     // Verificar se há clientes
     if (clients.length === 0) {
       window.showNotification("Você precisa adicionar clientes antes de criar sessões.", "info")
       return
     }
-    
+
     // Verificar se o modal já existe
     let modal = document.getElementById("add-session-modal")
     if (modal) {
       modal.classList.remove("hidden")
       return
     }
-    
+
     // Criar o modal
     modal = document.createElement("div")
     modal.id = "add-session-modal"
@@ -220,7 +224,7 @@ function showAddSessionModal() {
               <label for="session-client" class="block text-sm font-medium text-gray-700 mb-1">Cliente</label>
               <select id="session-client" name="cliente_id" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
                 <option value="">Selecione um cliente</option>
-                ${clients.map(client => `<option value="${client.id}">${client.nome}</option>`).join('')}
+                ${clients.map((client) => `<option value="${client.id}">${client.nome}</option>`).join("")}
               </select>
             </div>
             <div class="mb-4">
@@ -251,42 +255,42 @@ function showAddSessionModal() {
         </div>
       </div>
     `
-    
+
     // Adicionar o modal ao body
     document.body.appendChild(modal)
-    
+
     // Adicionar event listeners
     modal.querySelector(".modal-close").addEventListener("click", () => {
       modal.classList.add("hidden")
     })
-    
+
     modal.querySelector(".modal-close-btn").addEventListener("click", () => {
       modal.classList.add("hidden")
     })
-    
+
     modal.querySelector(".modal-overlay").addEventListener("click", () => {
       modal.classList.add("hidden")
     })
-    
+
     // Formulário de adicionar sessão
     document.getElementById("add-session-form").addEventListener("submit", async (e) => {
       e.preventDefault()
-      
+
       const formData = {
         titulo: document.getElementById("session-title").value,
         cliente_id: document.getElementById("session-client").value,
-        duracao: parseInt(document.getElementById("session-duration").value),
+        duracao: Number.parseInt(document.getElementById("session-duration").value),
         notas: document.getElementById("session-notes").value,
       }
-      
+
       // Combinar data e hora
       const dataDia = document.getElementById("session-date").value
       const dataHora = document.getElementById("session-time").value
       formData.data = new Date(`${dataDia}T${dataHora}`)
-      
+
       // Adicionar sessão
       const result = await window.createSession(currentUser.id, formData)
-      
+
       if (result.success) {
         window.showNotification("Sessão adicionada com sucesso!", "success")
         modal.classList.add("hidden")
@@ -314,7 +318,7 @@ function editSession(sessionId) {
 async function deleteSession(sessionId) {
   try {
     const result = await window.deleteSession(sessionId)
-    
+
     if (result.success) {
       window.showNotification("Sessão excluída com sucesso!", "success")
       window.renderSessionsPage() // Recarregar a página
@@ -331,7 +335,7 @@ async function deleteSession(sessionId) {
 async function requestSessionFeedback(sessionId) {
   try {
     const result = await window.requestSessionFeedback(sessionId)
-    
+
     if (result.success) {
       window.showNotification("Solicitação de feedback enviada com sucesso!", "success")
     } else {

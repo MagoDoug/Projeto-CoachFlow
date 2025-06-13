@@ -192,3 +192,18 @@ window.navigateTo = (page) => {
     }
   }, 300)
 }
+
+// Garantir que as funções estão disponíveis globalmente
+window.formatDate =
+  window.formatDate ||
+  ((dateString) => {
+    const options = { year: "numeric", month: "long", day: "numeric" }
+    return new Date(dateString).toLocaleDateString("pt-BR", options)
+  })
+
+window.formatTime =
+  window.formatTime ||
+  ((dateString) => {
+    const options = { hour: "2-digit", minute: "2-digit" }
+    return new Date(dateString).toLocaleTimeString("pt-BR", options)
+  })
