@@ -3,7 +3,7 @@
 // Obter todos os clientes de um coach
 async function getClients(coachId) {
   try {
-    const { data, error } = await window.supabase
+    const { data, error } = await window.supabaseInstance
       .from("clientes")
       .select("*")
       .eq("coach_id", coachId)
@@ -21,7 +21,7 @@ async function getClients(coachId) {
 // Obter um cliente específico
 async function getClient(clientId) {
   try {
-    const { data, error } = await window.supabase.from("clientes").select("*").eq("id", clientId).single()
+    const { data, error } = await window.supabaseInstance.from("clientes").select("*").eq("id", clientId).single()
 
     if (error) throw error
 
@@ -45,7 +45,7 @@ async function createClient(coachId, clientData) {
       }
     }
 
-    const { data, error } = await window.supabase
+    const { data, error } = await window.supabaseInstance
       .from("clientes")
       .insert([
         {
@@ -68,7 +68,11 @@ async function createClient(coachId, clientData) {
 // Atualizar cliente
 async function updateClient(clientId, clientData) {
   try {
-    const { data, error } = await window.supabase.from("clientes").update(clientData).eq("id", clientId).select()
+    const { data, error } = await window.supabaseInstance
+      .from("clientes")
+      .update(clientData)
+      .eq("id", clientId)
+      .select()
 
     if (error) throw error
 
@@ -83,16 +87,19 @@ async function updateClient(clientId, clientData) {
 async function deleteClient(clientId) {
   try {
     // Primeiro excluir todas as sessões e feedbacks relacionados
-    const { error: sessionsError } = await window.supabase.from("sessoes").delete().eq("cliente_id", clientId)
+    const { error: sessionsError } = await window.supabaseInstance.from("sessoes").delete().eq("cliente_id", clientId)
 
     if (sessionsError) throw sessionsError
 
-    const { error: feedbacksError } = await window.supabase.from("feedbacks").delete().eq("cliente_id", clientId)
+    const { error: feedbacksError } = await window.supabaseInstance
+      .from("feedbacks")
+      .delete()
+      .eq("cliente_id", clientId)
 
     if (feedbacksError) throw feedbacksError
 
     // Agora excluir o cliente
-    const { error } = await window.supabase.from("clientes").delete().eq("id", clientId)
+    const { error } = await window.supabaseInstance.from("clientes").delete().eq("id", clientId)
 
     if (error) throw error
 
@@ -107,7 +114,7 @@ async function deleteClient(clientId) {
 async function getClientProgress(clientId) {
   try {
     // Obter todas as sessões do cliente
-    const { data: sessions, error: sessionsError } = await window.supabase
+    const { data: sessions, error: sessionsError } = await window.supabaseInstance
       .from("sessoes")
       .select("*")
       .eq("cliente_id", clientId)
@@ -116,7 +123,7 @@ async function getClientProgress(clientId) {
     if (sessionsError) throw sessionsError
 
     // Obter todos os feedbacks do cliente
-    const { data: feedbacks, error: feedbacksError } = await window.supabase
+    const { data: feedbacks, error: feedbacksError } = await window.supabaseInstance
       .from("feedbacks")
       .select("*")
       .eq("cliente_id", clientId)

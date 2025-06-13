@@ -1,16 +1,10 @@
-// Import Supabase client
-import { createClient } from "@supabase/supabase-js"
-const supabaseUrl = "https://your-supabase-url.supabase.co"
-const supabaseKey = "your-supabase-key"
-const supabase = createClient(supabaseUrl, supabaseKey)
-
 // Serviço de autenticação
 
 // Registrar novo coach
 async function registerCoach(email, password, name) {
   try {
     // Registrar usuário no Supabase Auth
-    const { data: authData, error: authError } = await supabase.auth.signUp({
+    const { data: authData, error: authError } = await window.supabaseInstance.auth.signUp({
       email,
       password,
     })
@@ -18,7 +12,7 @@ async function registerCoach(email, password, name) {
     if (authError) throw authError
 
     // Criar perfil do coach
-    const { data: coachData, error: coachError } = await supabase.from("coaches").insert([
+    const { data: coachData, error: coachError } = await window.supabaseInstance.from("coaches").insert([
       {
         id: authData.user.id,
         name,
@@ -39,7 +33,7 @@ async function registerCoach(email, password, name) {
 // Login
 async function loginCoach(email, password) {
   try {
-    const { data, error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await window.supabaseInstance.auth.signInWithPassword({
       email,
       password,
     })
@@ -56,7 +50,7 @@ async function loginCoach(email, password) {
 // Logout
 async function logoutCoach() {
   try {
-    const { error } = await supabase.auth.signOut()
+    const { error } = await window.supabaseInstance.auth.signOut()
 
     if (error) throw error
 
@@ -70,7 +64,7 @@ async function logoutCoach() {
 // Verificar sessão atual
 async function getCurrentSession() {
   try {
-    const { data, error } = await supabase.auth.getSession()
+    const { data, error } = await window.supabaseInstance.auth.getSession()
 
     if (error) throw error
 
@@ -88,7 +82,7 @@ async function getCurrentSession() {
 // Recuperar senha
 async function resetPassword(email) {
   try {
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    const { error } = await window.supabaseInstance.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/reset-password`,
     })
 
@@ -104,7 +98,7 @@ async function resetPassword(email) {
 // Atualizar senha
 async function updatePassword(newPassword) {
   try {
-    const { error } = await supabase.auth.updateUser({
+    const { error } = await window.supabaseInstance.auth.updateUser({
       password: newPassword,
     })
 

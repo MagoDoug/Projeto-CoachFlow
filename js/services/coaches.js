@@ -3,7 +3,7 @@
 // Obter perfil do coach
 async function getCoachProfile(coachId) {
   try {
-    const { data, error } = await window.supabase.from("coaches").select("*").eq("id", coachId).single()
+    const { data, error } = await window.supabaseInstance.from("coaches").select("*").eq("id", coachId).single()
 
     if (error) throw error
 
@@ -17,7 +17,7 @@ async function getCoachProfile(coachId) {
 // Atualizar perfil do coach
 async function updateCoachProfile(coachId, profileData) {
   try {
-    const { data, error } = await window.supabase.from("coaches").update(profileData).eq("id", coachId)
+    const { data, error } = await window.supabaseInstance.from("coaches").update(profileData).eq("id", coachId)
 
     if (error) throw error
 
@@ -31,7 +31,7 @@ async function updateCoachProfile(coachId, profileData) {
 // Atualizar plano do coach
 async function updateCoachPlan(coachId, plan) {
   try {
-    const { data, error } = await window.supabase.from("coaches").update({ plan }).eq("id", coachId)
+    const { data, error } = await window.supabaseInstance.from("coaches").update({ plan }).eq("id", coachId)
 
     if (error) throw error
 
@@ -46,7 +46,7 @@ async function updateCoachPlan(coachId, plan) {
 async function getCoachStats(coachId) {
   try {
     // Obter contagem de clientes
-    const { data: clients, error: clientsError } = await window.supabase
+    const { data: clients, error: clientsError } = await window.supabaseInstance
       .from("clientes")
       .select("id")
       .eq("coach_id", coachId)
@@ -54,7 +54,7 @@ async function getCoachStats(coachId) {
     if (clientsError) throw clientsError
 
     // Obter contagem de sessões
-    const { data: sessions, error: sessionsError } = await window.supabase
+    const { data: sessions, error: sessionsError } = await window.supabaseInstance
       .from("sessoes")
       .select("id, cliente_id")
       .eq("coach_id", coachId)
@@ -62,7 +62,7 @@ async function getCoachStats(coachId) {
     if (sessionsError) throw sessionsError
 
     // Obter contagem de feedbacks
-    const { data: feedbacks, error: feedbacksError } = await window.supabase
+    const { data: feedbacks, error: feedbacksError } = await window.supabaseInstance
       .from("feedbacks")
       .select("id, rating")
       .eq("coach_id", coachId)
