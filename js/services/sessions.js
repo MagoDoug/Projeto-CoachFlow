@@ -101,30 +101,35 @@ async function createSession(coachId, sessionData) {
     if (error) throw error
 
     // Enviar notificação ao cliente sobre a nova sessão
-    const { data: clientData, error: clientError } = await window.supabaseInstance
-      .from("clientes")
-      .select("nome, email")
-      .eq("id", sessionData.cliente_id)
-      .single()
+    try {
+      const { data: clientData, error: clientError } = await window.supabaseInstance
+        .from("clientes")
+        .select("nome, email")
+        .eq("id", sessionData.cliente_id)
+        .single()
 
-    if (!clientError && clientData) {
-      await window.sendSessionNotification(clientData.email, clientData.nome, "nova_sessao", {
-        data: window.formatDate(sessionData.data),
-        hora: window.formatTime(sessionData.data),
-        titulo: sessionData.titulo,
-      })
+      if (!clientError && clientData) {
+        await window.sendSessionNotification(clientData.email, clientData.nome, "nova_sessao", {
+          data: window.formatDate(sessionData.data),
+          hora: window.formatTime(sessionData.data),
+          titulo: sessionData.titulo,
+        })
 
-      // Registrar notificação no banco de dados
-      await window.supabaseInstance.from("notificacoes").insert([
-        {
-          tipo: "nova_sessao",
-          destinatario_id: sessionData.cliente_id,
-          destinatario_tipo: "cliente",
-          conteudo: `Nova sessão agendada: ${sessionData.titulo} para ${window.formatDate(sessionData.data)} às ${window.formatTime(sessionData.data)}`,
-          lida: false,
-          created_at: new Date(),
-        },
-      ])
+        // Registrar notificação no banco de dados
+        await window.supabaseInstance.from("notificacoes").insert([
+          {
+            tipo: "nova_sessao",
+            destinatario_id: sessionData.cliente_id,
+            destinatario_tipo: "cliente",
+            conteudo: `Nova sessão agendada: ${sessionData.titulo} para ${window.formatDate(sessionData.data)} às ${window.formatTime(sessionData.data)}`,
+            lida: false,
+            created_at: new Date(),
+          },
+        ])
+      }
+    } catch (notificationError) {
+      console.warn("Erro ao enviar notificação:", notificationError)
+      // Não falhar a criação da sessão por causa da notificação
     }
 
     return { success: true, session: data[0] }
@@ -146,36 +151,46 @@ async function updateSession(sessionId, sessionData) {
     if (error) throw error
 
     // Enviar notificação ao cliente sobre a atualização da sessão
-    const { data: sessionInfo, error: sessionError } = await window.supabaseInstance
-      .from("sessoes")
-      .select(`
-        cliente_id,
-        clientes (
-          nome,
-          email
+    try {
+      const { data: sessionInfo, error: sessionError } = await window.supabaseInstance
+        .from("sessoes")
+        .select(`
+          cliente_id,
+          clientes (
+            nome,
+            email
+          )
+        `)
+        .eq("id", sessionId)
+        .single()
+
+      if (!sessionError && sessionInfo) {
+        await window.sendSessionNotification(
+          sessionInfo.clientes.email,
+          sessionInfo.clientes.nome,
+          "sessao_atualizada",
+          {
+            data: window.formatDate(sessionData.data),
+            hora: window.formatTime(sessionData.data),
+            titulo: sessionData.titulo,
+          },
         )
-      `)
-      .eq("id", sessionId)
-      .single()
 
-    if (!sessionError && sessionInfo) {
-      await window.sendSessionNotification(sessionInfo.clientes.email, sessionInfo.clientes.nome, "sessao_atualizada", {
-        data: window.formatDate(sessionData.data),
-        hora: window.formatTime(sessionData.data),
-        titulo: sessionData.titulo,
-      })
-
-      // Registrar notificação no banco de dados
-      await window.supabaseInstance.from("notificacoes").insert([
-        {
-          tipo: "sessao_atualizada",
-          destinatario_id: sessionInfo.cliente_id,
-          destinatario_tipo: "cliente",
-          conteudo: `Sessão atualizada: ${sessionData.titulo} para ${window.formatDate(sessionData.data)} às ${window.formatTime(sessionData.data)}`,
-          lida: false,
-          created_at: new Date(),
-        },
-      ])
+        // Registrar notificação no banco de dados
+        await window.supabaseInstance.from("notificacoes").insert([
+          {
+            tipo: "sessao_atualizada",
+            destinatario_id: sessionInfo.cliente_id,
+            destinatario_tipo: "cliente",
+            conteudo: `Sessão atualizada: ${sessionData.titulo} para ${window.formatDate(sessionData.data)} às ${window.formatTime(sessionData.data)}`,
+            lida: false,
+            created_at: new Date(),
+          },
+        ])
+      }
+    } catch (notificationError) {
+      console.warn("Erro ao enviar notificação:", notificationError)
+      // Não falhar a atualização da sessão por causa da notificação
     }
 
     return { success: true, session: data[0] }
@@ -217,24 +232,34 @@ async function deleteSession(sessionId) {
     if (error) throw error
 
     // Enviar notificação ao cliente sobre o cancelamento da sessão
-    if (!sessionError && sessionInfo) {
-      await window.sendSessionNotification(sessionInfo.clientes.email, sessionInfo.clientes.nome, "sessao_cancelada", {
-        titulo: sessionInfo.titulo,
-        data: window.formatDate(sessionInfo.data),
-        hora: window.formatTime(sessionInfo.data),
-      })
+    try {
+      if (!sessionError && sessionInfo) {
+        await window.sendSessionNotification(
+          sessionInfo.clientes.email,
+          sessionInfo.clientes.nome,
+          "sessao_cancelada",
+          {
+            titulo: sessionInfo.titulo,
+            data: window.formatDate(sessionInfo.data),
+            hora: window.formatTime(sessionInfo.data),
+          },
+        )
 
-      // Registrar notificação no banco de dados
-      await window.supabaseInstance.from("notificacoes").insert([
-        {
-          tipo: "sessao_cancelada",
-          destinatario_id: sessionInfo.cliente_id,
-          destinatario_tipo: "cliente",
-          conteudo: `Sessão cancelada: ${sessionInfo.titulo} que estava agendada para ${window.formatDate(sessionInfo.data)} às ${window.formatTime(sessionInfo.data)}`,
-          lida: false,
-          created_at: new Date(),
-        },
-      ])
+        // Registrar notificação no banco de dados
+        await window.supabaseInstance.from("notificacoes").insert([
+          {
+            tipo: "sessao_cancelada",
+            destinatario_id: sessionInfo.cliente_id,
+            destinatario_tipo: "cliente",
+            conteudo: `Sessão cancelada: ${sessionInfo.titulo} que estava agendada para ${window.formatDate(sessionInfo.data)} às ${window.formatTime(sessionInfo.data)}`,
+            lida: false,
+            created_at: new Date(),
+          },
+        ])
+      }
+    } catch (notificationError) {
+      console.warn("Erro ao enviar notificação:", notificationError)
+      // Não falhar a exclusão da sessão por causa da notificação
     }
 
     return { success: true }
@@ -244,14 +269,31 @@ async function deleteSession(sessionId) {
   }
 }
 
-// Solicitar feedback de uma sessão
+// Solicitar feedback de uma sessão - VERSÃO COMPLETAMENTE REESCRITA
 async function requestSessionFeedback(sessionId) {
+  console.log("Iniciando solicitação de feedback para sessão:", sessionId)
+
+  // Verificar se já está processando esta sessão
+  if (window.processingFeedbackRequest && window.processingFeedbackRequest[sessionId]) {
+    console.log("Já está processando feedback para esta sessão")
+    return { success: false, error: "Solicitação já em andamento" }
+  }
+
+  // Marcar como processando
+  if (!window.processingFeedbackRequest) {
+    window.processingFeedbackRequest = {}
+  }
+  window.processingFeedbackRequest[sessionId] = true
+
   try {
+    // Obter informações da sessão
     const { data: sessionInfo, error: sessionError } = await window.supabaseInstance
       .from("sessoes")
       .select(`
+        id,
         titulo,
         cliente_id,
+        feedback_token,
         clientes (
           nome,
           email
@@ -260,49 +302,91 @@ async function requestSessionFeedback(sessionId) {
       .eq("id", sessionId)
       .single()
 
-    if (sessionError) throw sessionError
+    if (sessionError) {
+      console.error("Erro ao obter informações da sessão:", sessionError)
+      throw sessionError
+    }
 
-    // Gerar um token único para o feedback
-    const feedbackToken = Math.random().toString(36).substring(2, 15)
+    if (!sessionInfo) {
+      throw new Error("Sessão não encontrada")
+    }
 
-    // Salvar o token no banco de dados
-    const { error: tokenError } = await window.supabaseInstance
-      .from("sessoes")
-      .update({ feedback_token: feedbackToken })
-      .eq("id", sessionId)
+    console.log("Informações da sessão obtidas:", sessionInfo)
 
-    if (tokenError) throw tokenError
+    // Gerar um token único para o feedback se não existir
+    let feedbackToken = sessionInfo.feedback_token
+    if (!feedbackToken) {
+      feedbackToken = `feedback_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`
+
+      // Salvar o token no banco de dados
+      const { error: tokenError } = await window.supabaseInstance
+        .from("sessoes")
+        .update({ feedback_token: feedbackToken })
+        .eq("id", sessionId)
+
+      if (tokenError) {
+        console.error("Erro ao salvar token de feedback:", tokenError)
+        throw tokenError
+      }
+    }
+
+    console.log("Token de feedback gerado/obtido:", feedbackToken)
 
     // Enviar email solicitando feedback
-    await window.sendSessionNotification(sessionInfo.clientes.email, sessionInfo.clientes.nome, "solicitar_feedback", {
-      titulo: sessionInfo.titulo,
-      feedback_link: `${window.location.origin}/feedback?token=${feedbackToken}&session=${sessionId}`,
-    })
+    try {
+      await window.sendSessionNotification(
+        sessionInfo.clientes.email,
+        sessionInfo.clientes.nome,
+        "solicitar_feedback",
+        {
+          titulo: sessionInfo.titulo,
+          feedback_link: `${window.location.origin}/feedback?token=${feedbackToken}&session=${sessionId}`,
+        },
+      )
+      console.log("Email de solicitação de feedback enviado")
+    } catch (emailError) {
+      console.warn("Erro ao enviar email:", emailError)
+      // Continuar mesmo se o email falhar
+    }
 
     // Registrar notificação no banco de dados
-    await window.supabaseInstance.from("notificacoes").insert([
-      {
-        tipo: "solicitar_feedback",
-        destinatario_id: sessionInfo.cliente_id,
-        destinatario_tipo: "cliente",
-        conteudo: `Solicitação de feedback para a sessão: ${sessionInfo.titulo}`,
-        lida: false,
-        created_at: new Date(),
-      },
-    ])
+    try {
+      await window.supabaseInstance.from("notificacoes").insert([
+        {
+          tipo: "solicitar_feedback",
+          destinatario_id: sessionInfo.cliente_id,
+          destinatario_tipo: "cliente",
+          conteudo: `Solicitação de feedback para a sessão: ${sessionInfo.titulo}`,
+          lida: false,
+          created_at: new Date(),
+        },
+      ])
+      console.log("Notificação registrada no banco de dados")
+    } catch (notificationError) {
+      console.warn("Erro ao registrar notificação:", notificationError)
+      // Continuar mesmo se a notificação falhar
+    }
 
+    console.log("Solicitação de feedback concluída com sucesso")
     return { success: true }
   } catch (error) {
     console.error("Erro ao solicitar feedback:", error)
     return { success: false, error: error.message }
+  } finally {
+    // Limpar o flag de processamento
+    if (window.processingFeedbackRequest) {
+      delete window.processingFeedbackRequest[sessionId]
+    }
   }
 }
 
-// Exportar funções para o escopo global
-window.getSessions = getSessions
-window.getClientSessions = getClientSessions
-window.getSession = getSession
-window.createSession = createSession
-window.updateSession = updateSession
-window.deleteSession = deleteSession
-window.requestSessionFeedback = requestSessionFeedback
+// Exportar funções para o escopo global - SEM RECURSÃO
+if (typeof window !== "undefined") {
+  window.getSessions = getSessions
+  window.getClientSessions = getClientSessions
+  window.getSession = getSession
+  window.createSession = createSession
+  window.updateSession = updateSession
+  window.deleteSession = deleteSession
+  window.requestSessionFeedback = requestSessionFeedback
+}

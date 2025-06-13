@@ -86,7 +86,7 @@ function createSessionCard(session, showActions = true) {
         showActions && !hasFeedback && isPast
           ? `
         <div class="mt-3 pt-3 border-t border-gray-100">
-          <button class="request-feedback-btn text-sm bg-indigo-600 text-white px-3 py-1 rounded hover:bg-indigo-700">
+          <button class="request-feedback-btn text-sm bg-indigo-600 text-white px-3 py-1 rounded hover:bg-indigo-700" data-session-id="${session.id}">
             Solicitar Feedback
           </button>
         </div>
@@ -101,13 +101,13 @@ function createSessionCard(session, showActions = true) {
           ${
             !isPast
               ? `
-            <button class="edit-session-btn text-sm bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">
+            <button class="edit-session-btn text-sm bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600" data-session-id="${session.id}">
               <i class="fas fa-edit"></i>
             </button>
           `
               : ""
           }
-          <button class="delete-session-btn text-sm bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">
+          <button class="delete-session-btn text-sm bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600" data-session-id="${session.id}">
             <i class="fas fa-trash"></i>
           </button>
         </div>
@@ -122,10 +122,11 @@ function createSessionCard(session, showActions = true) {
     // Botão de editar sessão
     const editBtn = card.querySelector(".edit-session-btn")
     if (editBtn) {
-      editBtn.addEventListener("click", (e) => {
+      editBtn.addEventListener("click", function (e) {
         e.stopPropagation()
+        const sessionId = this.getAttribute("data-session-id")
         if (typeof window.editSession === "function") {
-          window.editSession(session.id)
+          window.editSession(sessionId)
         }
       })
     }
@@ -133,23 +134,61 @@ function createSessionCard(session, showActions = true) {
     // Botão de excluir sessão
     const deleteBtn = card.querySelector(".delete-session-btn")
     if (deleteBtn) {
-      deleteBtn.addEventListener("click", (e) => {
+      deleteBtn.addEventListener("click", function (e) {
         e.stopPropagation()
+        const sessionId = this.getAttribute("data-session-id")
         if (confirm("Tem certeza que deseja excluir esta sessão?")) {
           if (typeof window.deleteSession === "function") {
-            window.deleteSession(session.id)
+            window.deleteSession(sessionId)
           }
         }
       })
     }
 
-    // Botão de solicitar feedback
+    // Botão de solicitar feedback - COM PROTEÇÃO CONTRA MÚLTIPLOS CLIQUES
     const requestFeedbackBtn = card.querySelector(".request-feedback-btn")
     if (requestFeedbackBtn) {
-      requestFeedbackBtn.addEventListener("click", (e) => {
+      requestFeedbackBtn.addEventListener("click", function (e) {
         e.stopPropagation()
+
+        // Verificar se o botão já está processando
+        if (this.disabled || this.classList.contains("processing")) {
+          return
+        }
+
+        const sessionId = this.getAttribute("data-session-id")
+
+        // Desabilitar o botão temporariamente
+        this.disabled = true
+        this.classList.add("processing")
+        const originalText = this.innerHTML
+        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...'
+
         if (typeof window.requestSessionFeedback === "function") {
-          window.requestSessionFeedback(session.id)
+          window
+            .requestSessionFeedback(sessionId)
+            .then((result) => {
+              if (result && result.success) {
+                window.showNotification("Solicitação de feedback enviada com sucesso!", "success")
+              } else {
+                window.showNotification(
+                  "Erro ao solicitar feedback: " + (result?.error || "Erro desconhecido"),
+                  "error",
+                )
+              }
+            })
+            .catch((error) => {
+              console.error("Erro ao solicitar feedback:", error)
+              window.showNotification("Ocorreu um erro ao solicitar feedback.", "error")
+            })
+            .finally(() => {
+              // Reabilitar o botão após 3 segundos
+              setTimeout(() => {
+                this.disabled = false
+                this.classList.remove("processing")
+                this.innerHTML = originalText
+              }, 3000)
+            })
         }
       })
     }
@@ -163,4 +202,9 @@ function createSessionCard(session, showActions = true) {
   }
 
   return card
+}
+
+// Exportar para o escopo global
+if (typeof window !== "undefined") {
+  window.createSessionCard = createSessionCard
 }

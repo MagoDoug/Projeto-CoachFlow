@@ -314,49 +314,12 @@ function editSession(sessionId) {
   window.showNotification("Funcionalidade de editar sessão em desenvolvimento.", "info")
 }
 
-// Função para excluir sessão
-async function deleteSession(sessionId) {
-  try {
-    const result = await window.deleteSession(sessionId)
-
-    if (result.success) {
-      window.showNotification("Sessão excluída com sucesso!", "success")
-      window.renderSessionsPage() // Recarregar a página
-    } else {
-      window.showNotification("Erro ao excluir sessão: " + result.error, "error")
-    }
-  } catch (error) {
-    console.error("Erro ao excluir sessão:", error)
-    window.showNotification("Ocorreu um erro ao excluir a sessão.", "error")
+// Exportar funções para o escopo global - SEM DUPLICAÇÃO
+if (typeof window !== "undefined") {
+  window.renderSessionsPage = renderSessionsPage
+  window.showAddSessionModal = showAddSessionModal
+  window.editSession = editSession
+  window.viewSessionDetails = (sessionId) => {
+    window.showNotification("Funcionalidade de visualizar detalhes da sessão em desenvolvimento.", "info")
   }
 }
-
-// Função para solicitar feedback
-async function requestSessionFeedback(sessionId) {
-  try {
-    const result = await window.requestSessionFeedback(sessionId)
-
-    if (result.success) {
-      window.showNotification("Solicitação de feedback enviada com sucesso!", "success")
-    } else {
-      window.showNotification("Erro ao solicitar feedback: " + result.error, "error")
-    }
-  } catch (error) {
-    console.error("Erro ao solicitar feedback:", error)
-    window.showNotification("Ocorreu um erro ao solicitar feedback.", "error")
-  }
-}
-
-// Função para ver detalhes da sessão
-function viewSessionDetails(sessionId) {
-  // Implementação para mostrar detalhes da sessão
-  window.showNotification("Funcionalidade de visualizar detalhes da sessão em desenvolvimento.", "info")
-}
-
-// Exportar funções para o escopo global
-window.renderSessionsPage = renderSessionsPage
-window.showAddSessionModal = showAddSessionModal
-window.editSession = editSession
-window.deleteSession = deleteSession
-window.requestSessionFeedback = requestSessionFeedback
-window.viewSessionDetails = viewSessionDetails
