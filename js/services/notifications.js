@@ -48,7 +48,7 @@ async function sendSessionNotification(email, name, type, data) {
     templateParams.subject = subject
 
     // Verificar se as configurações do EmailJS estão definidas
-    const EMAILJS_SERVICE_ID = "seu_service_id_emailjs" // Substitua pela sua configuração
+    const EMAILJS_SERVICE_ID = "mH4Lr2yeMa_QJpkRa" // Substitua pela sua configuração
 
     if (EMAILJS_SERVICE_ID === "seu_service_id_emailjs") {
       console.log("EmailJS não configurado. Simulando envio de email:", {
