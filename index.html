@@ -26,9 +26,16 @@
     // Garantir que as bibliotecas estão disponíveis globalmente
     window.Chart = Chart;
     window.emailjs = emailjs;
+    
+    // Injetar variáveis de ambiente (serão substituídas pelo servidor em produção)
+    window.EMAILJS_SERVICE_ID = '${process.env.EMAILJS_SERVICE_ID || ''}';
+    window.EMAILJS_PUBLIC_KEY = '${process.env.EMAILJS_PUBLIC_KEY || ''}';
+    window.SUPABASE_URL = '${process.env.SUPABASE_URL || 'https://woukxaakahobdmxzvlox.supabase.co'}';
+    window.SUPABASE_ANON_KEY = '${process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndvdWt4YWFrYWhvYmRteHp2bG94Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk3NjcwNjgsImV4cCI6MjA2NTM0MzA2OH0.avNn6iG6YJ69F5jv305vgJz6u3Hg4cksjmRiiekap_A'}';
   </script>
   
   <!-- Configurações -->
+  <script src="js/config/env.js"></script>
   <script src="js/config/emailjs.js"></script>
   
   <!-- Configuração e utilitários -->

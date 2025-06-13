@@ -1,11 +1,14 @@
-// Cliente Supabase centralizado
-const SUPABASE_URL = "https://woukxaakahobdmxzvlox.supabase.co"
-const SUPABASE_ANON_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndvdWt4YWFrYWhvYmRteHp2bG94Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk3NjcwNjgsImV4cCI6MjA2NTM0MzA2OH0.avNn6iG6YJ69F5jv305vgJz6u3Hg4cksjmRiiekap_A"
+// Cliente Supabase centralizado usando variáveis de ambiente
 
 // Função para inicializar o Supabase
 function initializeSupabase() {
   try {
+    // Usar variáveis de ambiente se disponíveis, senão usar valores padrão
+    const SUPABASE_URL = window.SUPABASE_URL || "https://woukxaakahobdmxzvlox.supabase.co"
+    const SUPABASE_ANON_KEY =
+      window.SUPABASE_ANON_KEY ||
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndvdWt4YWFrYWhvYmRteHp2bG94Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk3NjcwNjgsImV4cCI6MjA2NTM0MzA2OH0.avNn6iG6YJ69F5jv305vgJz6u3Hg4cksjmRiiekap_A"
+
     if (typeof window.supabase !== "undefined" && window.supabase.createClient) {
       // Inicializar o cliente Supabase
       window.supabaseInstance = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
@@ -14,7 +17,9 @@ function initializeSupabase() {
       window.SUPABASE_URL = SUPABASE_URL
       window.SUPABASE_ANON_KEY = SUPABASE_ANON_KEY
 
-      console.log("Supabase inicializado com sucesso")
+      console.log("✅ Supabase inicializado com sucesso")
+      console.log("- URL:", SUPABASE_URL)
+      console.log("- Anon Key:", SUPABASE_ANON_KEY ? "***configurado***" : "não configurado")
 
       // Adicionar uma função de verificação
       window.checkSupabaseConnection = async () => {
@@ -22,21 +27,21 @@ function initializeSupabase() {
           const { data, error } = await window.supabaseInstance
             .from("coaches")
             .select("count", { count: "exact", head: true })
-          console.log("Conexão com Supabase OK")
+          console.log("✅ Conexão com Supabase OK")
           return true
         } catch (error) {
-          console.error("Erro na conexão com Supabase:", error)
+          console.error("❌ Erro na conexão com Supabase:", error)
           return false
         }
       }
 
       return true
     } else {
-      console.error("Supabase não está disponível")
+      console.error("❌ Supabase não está disponível")
       return false
     }
   } catch (error) {
-    console.error("Erro ao inicializar Supabase:", error)
+    console.error("❌ Erro ao inicializar Supabase:", error)
     return false
   }
 }
