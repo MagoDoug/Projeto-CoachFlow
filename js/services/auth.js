@@ -1,8 +1,7 @@
 // Import Supabase client
 import { createClient } from "@supabase/supabase-js"
-
-const supabaseUrl = "https://woukxaakahobdmxzvlox.supabase.co"
-const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndvdWt4YWFrYWhvYmRteHp2bG94Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk3NjcwNjgsImV4cCI6MjA2NTM0MzA2OH0.avNn6iG6YJ69F5jv305vgJz6u3Hg4cksjmRiiekap_A"
+const supabaseUrl = "https://your-supabase-url.supabase.co"
+const supabaseKey = "your-supabase-key"
 const supabase = createClient(supabaseUrl, supabaseKey)
 
 // Serviço de autenticação
@@ -117,3 +116,11 @@ async function updatePassword(newPassword) {
     return { success: false, error: error.message }
   }
 }
+
+// Exportar funções para o escopo global
+window.registerCoach = registerCoach
+window.loginCoach = loginCoach
+window.logoutCoach = logoutCoach
+window.getCurrentSession = getCurrentSession
+window.resetPassword = resetPassword
+window.updatePassword = updatePassword

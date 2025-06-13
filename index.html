@@ -16,8 +16,8 @@
     </div>
   </div>
 
-  <!-- Scripts -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Scripts de bibliotecas externas -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
   
@@ -56,16 +56,5 @@
   
   <!-- App principal -->
   <script src="js/app.js"></script>
-  
-  <script>
-    // Tornar os componentes de gráfico disponíveis globalmente
-    window.Chart = Chart;
-    window.ChartContainer = window.ChartContainer || function() {};
-    window.ChartTooltip = window.ChartTooltip || function() {};
-    window.ChartTooltipContent = window.ChartTooltipContent || function() {};
-    window.ChartLegend = window.ChartLegend || function() {};
-    window.ChartLegendContent = window.ChartLegendContent || function() {};
-    window.ChartStyle = window.ChartStyle || function() {};
-  </script>
 </body>
 </html>

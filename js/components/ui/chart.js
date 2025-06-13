@@ -1,17 +1,14 @@
 // Componentes de gráfico para o CoachFlow
 // Este arquivo exporta todos os componentes necessários para os gráficos
 
-// Exportar Chart do Chart.js global (carregado via CDN)
-export const Chart = window.Chart
-
 // Componente de container para gráficos
-export const ChartContainer = (props) => {
-  const { children, className, config } = props
+function ChartContainer(props) {
+  const { children, className, config } = props || {}
 
   // Aplicar configuração de cores aos elementos CSS
   if (config) {
     Object.entries(config).forEach(([key, value]) => {
-      if (value.color) {
+      if (value && value.color) {
         document.documentElement.style.setProperty(`--color-${key}`, value.color)
       }
     })
@@ -32,8 +29,8 @@ export const ChartContainer = (props) => {
 }
 
 // Componente de tooltip para gráficos
-export const ChartTooltip = (props) => {
-  const { content } = props
+function ChartTooltip(props) {
+  const { content } = props || {}
 
   // Criar um tooltip personalizado
   const tooltip = document.createElement("div")
@@ -57,10 +54,10 @@ export const ChartTooltip = (props) => {
 }
 
 // Componente de conteúdo do tooltip
-export const ChartTooltipContent = (props) => {
+function ChartTooltipContent(props) {
   // Criar o conteúdo do tooltip
   return (context) => {
-    if (!context.tooltip || !context.tooltip.dataPoints || context.tooltip.dataPoints.length === 0) {
+    if (!context || !context.tooltip || !context.tooltip.dataPoints || context.tooltip.dataPoints.length === 0) {
       return null
     }
 
@@ -84,8 +81,8 @@ export const ChartTooltipContent = (props) => {
 }
 
 // Componente de legenda para gráficos
-export const ChartLegend = (props) => {
-  const { content } = props
+function ChartLegend(props) {
+  const { content } = props || {}
 
   // Criar uma legenda personalizada
   const legend = document.createElement("div")
@@ -104,7 +101,7 @@ export const ChartLegend = (props) => {
 }
 
 // Componente de conteúdo da legenda
-export const ChartLegendContent = (props) => {
+function ChartLegendContent(props) {
   // Criar o conteúdo da legenda
   return (chart) => {
     const content = document.createElement("div")
@@ -138,8 +135,8 @@ export const ChartLegendContent = (props) => {
 }
 
 // Componente de estilo para gráficos
-export const ChartStyle = (props) => {
-  const { colors } = props
+function ChartStyle(props) {
+  const { colors } = props || {}
 
   // Criar um elemento de estilo
   const style = document.createElement("style")
@@ -167,3 +164,12 @@ export const ChartStyle = (props) => {
 
   return style
 }
+
+// Exportar para o escopo global
+window.Chart = window.Chart || {}
+window.ChartContainer = ChartContainer
+window.ChartTooltip = ChartTooltip
+window.ChartTooltipContent = ChartTooltipContent
+window.ChartLegend = ChartLegend
+window.ChartLegendContent = ChartLegendContent
+window.ChartStyle = ChartStyle
