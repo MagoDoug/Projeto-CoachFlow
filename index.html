@@ -27,12 +27,21 @@
     window.Chart = Chart;
     window.emailjs = emailjs;
     
-    // Definir variáveis de ambiente diretamente
-    // Em produção, estes valores serão substituídos pelas variáveis reais do Vercel
-    window.EMAILJS_SERVICE_ID = 'service_ik0b5tp'; // Será substituído pela variável real
-    window.EMAILJS_PUBLIC_KEY = 'mH4Lr2yeMa_QJpkRa'; // Será substituído pela variável real
-    window.SUPABASE_URL = 'https://woukxaakahobdmxzvlox.supabase.co';
-    window.SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndvdWt4YWFrYWhvYmRteHp2bG94Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk3NjcwNjgsImV4cCI6MjA2NTM0MzA2OH0.avNn6iG6YJ69F5jv305vgJz6u3Hg4cksjmRiiekap_A';
+    // Injetar variáveis de ambiente do Vercel
+    // Estas serão substituídas automaticamente no deploy
+    window.EMAILJS_SERVICE_ID = process.env.EMAILJS_SERVICE_ID || 'service_ik0b5tp';
+    window.EMAILJS_PUBLIC_KEY = process.env.EMAILJS_PUBLIC_KEY || 'mH4Lr2yeMa_QJpkRa';
+    window.SUPABASE_URL = process.env.SUPABASE_URL || 'https://woukxaakahobdmxzvlox.supabase.co';
+    window.SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndvdWt4YWFrYWhvYmRteHp2bG94Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk3NjcwNjgsImV4cCI6MjA2NTM0MzA2OH0.avNn6iG6YJ69F5jv305vgJz6u3Hg4cksjmRiiekap_A';
+    
+    // Log das variáveis para debug
+    console.log('🔧 Carregando variáveis de ambiente...');
+    console.log('📧 Variáveis EmailJS:');
+    console.log('- Service ID:', window.EMAILJS_SERVICE_ID ? '✅ Configurado' : '❌ Não encontrado');
+    console.log('- Public Key:', window.EMAILJS_PUBLIC_KEY ? '✅ Configurado' : '❌ Não encontrado');
+    console.log('🗄️ Variáveis Supabase:');
+    console.log('- URL:', window.SUPABASE_URL ? '✅ Configurado' : '❌ Não encontrado');
+    console.log('- Anon Key:', window.SUPABASE_ANON_KEY ? '✅ Configurado' : '❌ Não encontrado');
   </script>
   
   <!-- Configurações -->

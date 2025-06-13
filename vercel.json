@@ -1,8 +1,15 @@
 {
-  "rewrites": [
+  "version": 2,
+  "builds": [
     {
-      "source": "/",
-      "destination": "/index.html"
+      "src": "index.html",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
     }
   ],
   "headers": [
@@ -23,5 +30,11 @@
         }
       ]
     }
-  ]
+  ],
+  "env": {
+    "EMAILJS_SERVICE_ID": "@emailjs_service_id",
+    "EMAILJS_PUBLIC_KEY": "@emailjs_public_key",
+    "SUPABASE_URL": "@supabase_url",
+    "SUPABASE_ANON_KEY": "@supabase_anon_key"
+  }
 }
