@@ -5,13 +5,13 @@ window.EMAILJS_CONFIG = {
   SERVICE_ID: window.EMAILJS_SERVICE_ID || "service_ik0b5tp",
   PUBLIC_KEY: window.EMAILJS_PUBLIC_KEY || "mH4Lr2yeMa_QJpkRa",
 
-  // IDs dos templates que você criou no EmailJS
+  // IDs dos templates que você criou no EmailJS - CORRIGIDOS
   TEMPLATES: {
-    nova_sessao: "template_1835qcl",
-    sessao_atualizada: "template_sessao_atualizada",
-    sessao_cancelada: "template_sessao_cancelada",
-    solicitar_feedback: "template_igrngdo",
-    padrao: "template_igrngdo", // Usar o template de feedback como padrão
+    nova_sessao: "template_1835qcl", // Este existe
+    sessao_atualizada: "template_1835qcl", // Usar o mesmo template
+    sessao_cancelada: "template_1835qcl", // Usar o mesmo template
+    solicitar_feedback: "template_1835qcl", // Usar o template que existe
+    padrao: "template_1835qcl", // Usar o template que existe
   },
 
   // Configurações adicionais
@@ -64,6 +64,7 @@ window.checkEmailJSConfiguration = () => {
   console.log("- Habilitado:", config.ENABLED)
   console.log("- Service ID:", config.SERVICE_ID)
   console.log("- Public Key:", hasPublicKey ? "***configurado***" : "não configurado")
+  console.log("- Template padrão:", config.TEMPLATES.padrao)
   console.log("- Configuração válida:", isConfigured)
 
   if (!isConfigured) {
@@ -89,3 +90,4 @@ console.log("📧 Configuração EmailJS carregada")
 console.log("Status:", window.EMAILJS_CONFIG.ENABLED ? "Habilitado" : "Desabilitado")
 console.log("Service ID:", window.EMAILJS_CONFIG.SERVICE_ID)
 console.log("Public Key:", window.EMAILJS_CONFIG.PUBLIC_KEY ? "***configurado***" : "não configurado")
+console.log("Template padrão:", window.EMAILJS_CONFIG.TEMPLATES.padrao)
