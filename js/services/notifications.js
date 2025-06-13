@@ -57,7 +57,7 @@ async function sendSessionNotification(email, name, type, data) {
 // Obter notificações não lidas
 async function getUnreadNotifications(userId, userType) {
   try {
-    const { data, error } = await window.supabase
+    const { data, error } = await window.supabaseInstance
       .from("notificacoes")
       .select("*")
       .eq("destinatario_id", userId)
@@ -77,7 +77,7 @@ async function getUnreadNotifications(userId, userType) {
 // Obter todas as notificações
 async function getAllNotifications(userId, userType) {
   try {
-    const { data, error } = await window.supabase
+    const { data, error } = await window.supabaseInstance
       .from("notificacoes")
       .select("*")
       .eq("destinatario_id", userId)
@@ -96,7 +96,7 @@ async function getAllNotifications(userId, userType) {
 // Marcar notificação como lida
 async function markNotificationAsRead(notificationId) {
   try {
-    const { error } = await window.supabase.from("notificacoes").update({ lida: true }).eq("id", notificationId)
+    const { error } = await window.supabaseInstance.from("notificacoes").update({ lida: true }).eq("id", notificationId)
 
     if (error) throw error
 
@@ -110,7 +110,7 @@ async function markNotificationAsRead(notificationId) {
 // Marcar todas as notificações como lidas
 async function markAllNotificationsAsRead(userId, userType) {
   try {
-    const { error } = await window.supabase
+    const { error } = await window.supabaseInstance
       .from("notificacoes")
       .update({ lida: true })
       .eq("destinatario_id", userId)

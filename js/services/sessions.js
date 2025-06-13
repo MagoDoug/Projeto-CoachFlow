@@ -3,7 +3,7 @@
 // Obter todas as sessões de um coach
 async function getSessions(coachId) {
   try {
-    const { data, error } = await window.supabase
+    const { data, error } = await window.supabaseInstance
       .from("sessoes")
       .select(`
         *,
@@ -28,7 +28,7 @@ async function getSessions(coachId) {
 // Obter sessões de um cliente específico
 async function getClientSessions(clientId) {
   try {
-    const { data, error } = await window.supabase
+    const { data, error } = await window.supabaseInstance
       .from("sessoes")
       .select("*")
       .eq("cliente_id", clientId)
@@ -46,7 +46,7 @@ async function getClientSessions(clientId) {
 // Obter uma sessão específica
 async function getSession(sessionId) {
   try {
-    const { data, error } = await window.supabase
+    const { data, error } = await window.supabaseInstance
       .from("sessoes")
       .select(`
         *,
@@ -72,7 +72,7 @@ async function getSession(sessionId) {
 async function createSession(coachId, sessionData) {
   try {
     // Verificar limite do plano gratuito
-    const { data: existingSessions, error: countError } = await window.supabase
+    const { data: existingSessions, error: countError } = await window.supabaseInstance
       .from("sessoes")
       .select("id")
       .eq("cliente_id", sessionData.cliente_id)
@@ -87,7 +87,7 @@ async function createSession(coachId, sessionData) {
       }
     }
 
-    const { data, error } = await window.supabase
+    const { data, error } = await window.supabaseInstance
       .from("sessoes")
       .insert([
         {
@@ -101,7 +101,7 @@ async function createSession(coachId, sessionData) {
     if (error) throw error
 
     // Enviar notificação ao cliente sobre a nova sessão
-    const { data: clientData, error: clientError } = await window.supabase
+    const { data: clientData, error: clientError } = await window.supabaseInstance
       .from("clientes")
       .select("nome, email")
       .eq("id", sessionData.cliente_id)
@@ -115,7 +115,7 @@ async function createSession(coachId, sessionData) {
       })
 
       // Registrar notificação no banco de dados
-      await window.supabase.from("notificacoes").insert([
+      await window.supabaseInstance.from("notificacoes").insert([
         {
           tipo: "nova_sessao",
           destinatario_id: sessionData.cliente_id,
@@ -137,12 +137,16 @@ async function createSession(coachId, sessionData) {
 // Atualizar sessão
 async function updateSession(sessionId, sessionData) {
   try {
-    const { data, error } = await window.supabase.from("sessoes").update(sessionData).eq("id", sessionId).select()
+    const { data, error } = await window.supabaseInstance
+      .from("sessoes")
+      .update(sessionData)
+      .eq("id", sessionId)
+      .select()
 
     if (error) throw error
 
     // Enviar notificação ao cliente sobre a atualização da sessão
-    const { data: sessionInfo, error: sessionError } = await window.supabase
+    const { data: sessionInfo, error: sessionError } = await window.supabaseInstance
       .from("sessoes")
       .select(`
         cliente_id,
@@ -162,7 +166,7 @@ async function updateSession(sessionId, sessionData) {
       })
 
       // Registrar notificação no banco de dados
-      await window.supabase.from("notificacoes").insert([
+      await window.supabaseInstance.from("notificacoes").insert([
         {
           tipo: "sessao_atualizada",
           destinatario_id: sessionInfo.cliente_id,
@@ -185,7 +189,7 @@ async function updateSession(sessionId, sessionData) {
 async function deleteSession(sessionId) {
   try {
     // Primeiro obter informações da sessão para notificação
-    const { data: sessionInfo, error: sessionError } = await window.supabase
+    const { data: sessionInfo, error: sessionError } = await window.supabaseInstance
       .from("sessoes")
       .select(`
         titulo,
@@ -200,12 +204,15 @@ async function deleteSession(sessionId) {
       .single()
 
     // Excluir feedbacks relacionados
-    const { error: feedbacksError } = await window.supabase.from("feedbacks").delete().eq("sessao_id", sessionId)
+    const { error: feedbacksError } = await window.supabaseInstance
+      .from("feedbacks")
+      .delete()
+      .eq("sessao_id", sessionId)
 
     if (feedbacksError) throw feedbacksError
 
     // Agora excluir a sessão
-    const { error } = await window.supabase.from("sessoes").delete().eq("id", sessionId)
+    const { error } = await window.supabaseInstance.from("sessoes").delete().eq("id", sessionId)
 
     if (error) throw error
 
@@ -218,7 +225,7 @@ async function deleteSession(sessionId) {
       })
 
       // Registrar notificação no banco de dados
-      await window.supabase.from("notificacoes").insert([
+      await window.supabaseInstance.from("notificacoes").insert([
         {
           tipo: "sessao_cancelada",
           destinatario_id: sessionInfo.cliente_id,
@@ -240,7 +247,7 @@ async function deleteSession(sessionId) {
 // Solicitar feedback de uma sessão
 async function requestSessionFeedback(sessionId) {
   try {
-    const { data: sessionInfo, error: sessionError } = await window.supabase
+    const { data: sessionInfo, error: sessionError } = await window.supabaseInstance
       .from("sessoes")
       .select(`
         titulo,
@@ -259,7 +266,7 @@ async function requestSessionFeedback(sessionId) {
     const feedbackToken = Math.random().toString(36).substring(2, 15)
 
     // Salvar o token no banco de dados
-    const { error: tokenError } = await window.supabase
+    const { error: tokenError } = await window.supabaseInstance
       .from("sessoes")
       .update({ feedback_token: feedbackToken })
       .eq("id", sessionId)
@@ -273,7 +280,7 @@ async function requestSessionFeedback(sessionId) {
     })
 
     // Registrar notificação no banco de dados
-    await window.supabase.from("notificacoes").insert([
+    await window.supabaseInstance.from("notificacoes").insert([
       {
         tipo: "solicitar_feedback",
         destinatario_id: sessionInfo.cliente_id,

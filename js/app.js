@@ -4,6 +4,13 @@
 document.addEventListener("DOMContentLoaded", () => {
   // Aguardar um pouco para garantir que o Supabase foi inicializado
   setTimeout(() => {
+    // Verificar se o Supabase foi inicializado
+    if (!window.supabaseInstance) {
+      console.error("Supabase não foi inicializado")
+      window.navigateTo("login")
+      return
+    }
+
     // Verificar se o usuário está autenticado
     if (typeof window.getCurrentSession === "function") {
       window
@@ -25,7 +32,7 @@ document.addEventListener("DOMContentLoaded", () => {
       console.error("getCurrentSession não está disponível")
       window.navigateTo("login")
     }
-  }, 1000)
+  }, 1500)
 })
 
 // Definir limites do plano gratuito no escopo global

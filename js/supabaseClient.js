@@ -15,6 +15,20 @@ document.addEventListener("DOMContentLoaded", () => {
     window.SUPABASE_ANON_KEY = SUPABASE_ANON_KEY
 
     console.log("Supabase inicializado com sucesso")
+
+    // Adicionar uma função de verificação
+    window.checkSupabaseConnection = async () => {
+      try {
+        const { data, error } = await window.supabaseInstance
+          .from("coaches")
+          .select("count", { count: "exact", head: true })
+        console.log("Conexão com Supabase OK")
+        return true
+      } catch (error) {
+        console.error("Erro na conexão com Supabase:", error)
+        return false
+      }
+    }
   } else {
     console.error("Supabase não está disponível")
   }
