@@ -1,17 +1,9 @@
-import { ChartStyle } from "@/components/ui/chart"
-import { ChartLegendContent } from "@/components/ui/chart"
-import { ChartLegend } from "@/components/ui/chart"
-import { ChartTooltipContent } from "@/components/ui/chart"
-import { ChartTooltip } from "@/components/ui/chart"
-import { ChartContainer } from "@/components/ui/chart"
-import { Chart } from "@/components/ui/chart"
 // Componente de gráfico de progresso
 
-// Não precisamos importar Chart, pois já está disponível globalmente via CDN
-// import {
-Chart, ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent, ChartStyle
-\
-} from "@/components/ui/chart"
+// Importar os componentes necessários
+// Nota: Estas importações são simuladas, pois estamos em um ambiente JavaScript puro
+// Em um ambiente real com módulos, usaríamos import
+const { Chart, ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent, ChartStyle } = window // Assumindo que estes componentes estão disponíveis globalmente
 
 function createProgressChart(clientId, containerId) {
   // Criar o container para o gráfico
@@ -20,6 +12,15 @@ function createProgressChart(clientId, containerId) {
 
   // Limpar o container
   container.innerHTML = ""
+
+  // Adicionar estilos para o gráfico
+  const chartStyle = new ChartStyle({
+    colors: {
+      1: "#4f46e5", // Indigo
+      2: "#10b981", // Green
+    },
+  })
+  document.head.appendChild(chartStyle)
 
   // Criar o canvas para o gráfico
   const canvas = document.createElement("canvas")
@@ -49,7 +50,7 @@ function createProgressChart(clientId, containerId) {
 
       // Criar o gráfico usando Chart.js
       const ctx = canvas.getContext("2d")
-      new Chart(ctx, {
+      const chartConfig = {
         type: "line",
         data: {
           labels: labels,
@@ -97,7 +98,27 @@ function createProgressChart(clientId, containerId) {
             },
           },
         },
+      }
+
+      // Criar o gráfico dentro de um ChartContainer
+      const chartContainer = new ChartContainer({
+        className: "h-64",
+        config: {
+          progress: {
+            label: "Progresso",
+            color: "hsl(var(--chart-1))",
+          },
+        },
       })
+
+      // Adicionar o gráfico ao container
+      new Chart(ctx, chartConfig)
+
+      // Adicionar legenda personalizada
+      const legend = new ChartLegend({
+        content: new ChartLegendContent()(chartConfig),
+      })
+      container.appendChild(legend)
     } catch (error) {
       console.error("Erro ao criar gráfico de progresso:", error)
       container.innerHTML = '<p class="text-center text-gray-500">Erro ao carregar dados de progresso.</p>'
@@ -111,3 +132,6 @@ function createProgressChart(clientId, containerId) {
     refresh: loadChartData,
   }
 }
+
+// Exportar a função para o escopo global
+window.createProgressChart = createProgressChart
