@@ -43,10 +43,37 @@ function initializeEmailJS() {
   }
 }
 
-// Enviar notificação por email
+// Enviar notificação por email - VERSÃO CORRIGIDA
 async function sendSessionNotification(email, name, type, data) {
   console.log("📧 === INICIANDO ENVIO DE EMAIL ===")
   console.log("Parâmetros recebidos:", { email, name, type, data })
+
+  // VALIDAÇÃO DOS PARÂMETROS DE ENTRADA
+  if (!email || email.trim() === "") {
+    console.error("❌ ERRO: Email do destinatário está vazio!")
+    console.log("Parâmetros recebidos:", { email, name, type, data })
+    return {
+      success: false,
+      error: "Email do destinatário é obrigatório",
+      simulated: true,
+    }
+  }
+
+  if (!name || name.trim() === "") {
+    console.warn("⚠️ AVISO: Nome do destinatário está vazio, usando 'Cliente'")
+    name = "Cliente"
+  }
+
+  // Validar formato do email
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  if (!emailRegex.test(email.trim())) {
+    console.error("❌ ERRO: Formato de email inválido:", email)
+    return {
+      success: false,
+      error: "Formato de email inválido",
+      simulated: true,
+    }
+  }
 
   try {
     const config = window.EMAILJS_CONFIG || {}
@@ -75,9 +102,12 @@ async function sendSessionNotification(email, name, type, data) {
     }
 
     // Construir parâmetros do template de forma segura
+    const cleanEmail = email.trim()
+    const cleanName = name.trim() || "Cliente"
+
     const templateParams = {
-      to_email: String(email || ""),
-      to_name: String(name || ""),
+      to_email: cleanEmail,
+      to_name: cleanName,
       from_name: "CoachFlow",
     }
 
@@ -89,7 +119,7 @@ async function sendSessionNotification(email, name, type, data) {
       if (data.feedback_link) templateParams.feedback_link = String(data.feedback_link)
     }
 
-    const templateId = config.TEMPLATES[type] || config.TEMPLATES.padrao || "template_igrngdo"
+    const templateId = config.TEMPLATES[type] || config.TEMPLATES.padrao || "template_1835qcl"
     let subject = ""
     let message = ""
 
@@ -124,7 +154,19 @@ async function sendSessionNotification(email, name, type, data) {
     console.log("📧 Preparando envio real do email:")
     console.log("- Template ID:", templateId)
     console.log("- Service ID:", config.SERVICE_ID)
-    console.log("- Parâmetros:", templateParams)
+    console.log("- Email destinatário:", templateParams.to_email)
+    console.log("- Nome destinatário:", templateParams.to_name)
+    console.log("- Parâmetros completos:", templateParams)
+
+    // Verificar novamente se o email não está vazio
+    if (!templateParams.to_email || templateParams.to_email.trim() === "") {
+      console.error("❌ ERRO CRÍTICO: Email ainda está vazio após processamento!")
+      return {
+        success: false,
+        error: "Email do destinatário está vazio após processamento",
+        simulated: true,
+      }
+    }
 
     // Tentar enviar o email com timeout
     console.log("🚀 Enviando email via EmailJS...")
