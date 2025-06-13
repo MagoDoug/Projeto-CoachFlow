@@ -43,7 +43,7 @@ function initializeEmailJS() {
   }
 }
 
-// Enviar notificação por email - VERSÃO CORRIGIDA
+// Enviar notificação por email - VERSÃO CORRIGIDA COM MÚLTIPLOS CAMPOS
 async function sendSessionNotification(email, name, type, data) {
   console.log("📧 === INICIANDO ENVIO DE EMAIL ===")
   console.log("Parâmetros recebidos:", { email, name, type, data })
@@ -101,22 +101,52 @@ async function sendSessionNotification(email, name, type, data) {
       return { success: true, simulated: true, reason: "Falha na inicialização" }
     }
 
-    // Construir parâmetros do template de forma segura
+    // Construir parâmetros do template com MÚLTIPLOS CAMPOS DE EMAIL
     const cleanEmail = email.trim()
     const cleanName = name.trim() || "Cliente"
 
     const templateParams = {
+      // Múltiplas variações do campo de email para compatibilidade
       to_email: cleanEmail,
+      email: cleanEmail,
+      recipient_email: cleanEmail,
+      user_email: cleanEmail,
+      destinatario_email: cleanEmail,
+
+      // Múltiplas variações do campo de nome
       to_name: cleanName,
+      name: cleanName,
+      recipient_name: cleanName,
+      user_name: cleanName,
+      destinatario_nome: cleanName,
+
+      // Campos padrão
       from_name: "CoachFlow",
+      reply_to: "noreply@coachflow.com",
     }
 
     // Adicionar dados específicos baseados no tipo, garantindo que são strings
     if (data && typeof data === "object") {
-      if (data.data) templateParams.data = String(data.data)
-      if (data.hora) templateParams.hora = String(data.hora)
-      if (data.titulo) templateParams.titulo = String(data.titulo)
-      if (data.feedback_link) templateParams.feedback_link = String(data.feedback_link)
+      if (data.data) {
+        templateParams.data = String(data.data)
+        templateParams.session_date = String(data.data)
+        templateParams.data_sessao = String(data.data)
+      }
+      if (data.hora) {
+        templateParams.hora = String(data.hora)
+        templateParams.session_time = String(data.hora)
+        templateParams.hora_sessao = String(data.hora)
+      }
+      if (data.titulo) {
+        templateParams.titulo = String(data.titulo)
+        templateParams.session_title = String(data.titulo)
+        templateParams.titulo_sessao = String(data.titulo)
+      }
+      if (data.feedback_link) {
+        templateParams.feedback_link = String(data.feedback_link)
+        templateParams.link_feedback = String(data.feedback_link)
+        templateParams.url_feedback = String(data.feedback_link)
+      }
     }
 
     const templateId = config.TEMPLATES[type] || config.TEMPLATES.padrao || "template_1835qcl"
@@ -148,8 +178,13 @@ async function sendSessionNotification(email, name, type, data) {
         message = `Olá ${templateParams.to_name}, você tem uma nova notificação do CoachFlow.`
     }
 
+    // Adicionar subject e message com múltiplas variações
     templateParams.subject = subject
     templateParams.message = message
+    templateParams.assunto = subject
+    templateParams.mensagem = message
+    templateParams.email_subject = subject
+    templateParams.email_message = message
 
     console.log("📧 Preparando envio real do email:")
     console.log("- Template ID:", templateId)
@@ -170,6 +205,12 @@ async function sendSessionNotification(email, name, type, data) {
 
     // Tentar enviar o email com timeout
     console.log("🚀 Enviando email via EmailJS...")
+    console.log("📋 Campos de email enviados:", {
+      to_email: templateParams.to_email,
+      email: templateParams.email,
+      recipient_email: templateParams.recipient_email,
+      user_email: templateParams.user_email,
+    })
 
     const emailPromise = window.emailjs.send(config.SERVICE_ID, templateId, templateParams)
 
