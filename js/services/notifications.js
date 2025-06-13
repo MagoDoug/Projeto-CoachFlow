@@ -43,7 +43,7 @@ function initializeEmailJS() {
   }
 }
 
-// Enviar notificação por email - VERSÃO OTIMIZADA COM CAMPO "EMAIL"
+// Enviar notificação por email - COM NOME DO CLIENTE
 async function sendSessionNotification(email, name, type, data) {
   console.log("📧 === INICIANDO ENVIO DE EMAIL ===")
   console.log("Parâmetros recebidos:", { email, name, type, data })
@@ -91,7 +91,7 @@ async function sendSessionNotification(email, name, type, data) {
       return { success: true, simulated: true, reason: "Falha na inicialização" }
     }
 
-    // Construir parâmetros do template - USANDO "EMAIL" COMO CAMPO PRINCIPAL
+    // Construir parâmetros do template - INCLUINDO NOME DO CLIENTE
     const cleanEmail = email.trim()
     const cleanName = name.trim() || "Cliente"
 
@@ -99,12 +99,14 @@ async function sendSessionNotification(email, name, type, data) {
       // Campo principal que funciona
       email: cleanEmail,
       name: cleanName,
+      cliente: cleanName, // ✅ ADICIONADO: Variável "cliente" para o template
 
       // Campos alternativos para compatibilidade
       to_email: cleanEmail,
       recipient_email: cleanEmail,
       to_name: cleanName,
       recipient_name: cleanName,
+      client_name: cleanName,
 
       // Campos padrão
       from_name: "CoachFlow",
@@ -116,18 +118,22 @@ async function sendSessionNotification(email, name, type, data) {
       if (data.data) {
         templateParams.session_date = String(data.data)
         templateParams.data = String(data.data)
+        templateParams.data_sessao = String(data.data)
       }
       if (data.hora) {
         templateParams.session_time = String(data.hora)
         templateParams.hora = String(data.hora)
+        templateParams.hora_sessao = String(data.hora)
       }
       if (data.titulo) {
         templateParams.session_title = String(data.titulo)
         templateParams.titulo = String(data.titulo)
+        templateParams.titulo_sessao = String(data.titulo)
       }
       if (data.feedback_link) {
         templateParams.feedback_link = String(data.feedback_link)
         templateParams.link = String(data.feedback_link)
+        templateParams.link_feedback = String(data.feedback_link)
       }
     }
 
@@ -168,6 +174,7 @@ async function sendSessionNotification(email, name, type, data) {
     console.log("- Service ID:", config.SERVICE_ID)
     console.log("- Email destinatário:", templateParams.email)
     console.log("- Nome destinatário:", templateParams.name)
+    console.log("- Cliente (variável):", templateParams.cliente) // ✅ Log da variável cliente
     console.log("- Assunto:", templateParams.subject)
 
     // Tentar enviar o email
@@ -185,9 +192,10 @@ async function sendSessionNotification(email, name, type, data) {
     console.log("✅ EMAIL ENVIADO COM SUCESSO!")
     console.log("📬 Resposta do EmailJS:", response)
     console.log("📧 Email enviado para:", templateParams.email)
-    console.log("👤 Destinatário:", templateParams.name)
+    console.log("👤 Cliente:", templateParams.cliente) // ✅ Log do nome do cliente
+    console.log("📝 Título da sessão:", templateParams.session_title)
 
-    return { success: true, response, sent: true, email: templateParams.email }
+    return { success: true, response, sent: true, email: templateParams.email, cliente: templateParams.cliente }
   } catch (error) {
     console.error("❌ Erro ao enviar email:", error)
     console.error("Stack trace:", error.stack)
