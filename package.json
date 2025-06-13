@@ -1,8 +1,16 @@
 {
-  "name": "my-v0-project",
-  "version": "0.1.0",
+  "name": "coachflow-v0",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "echo 'no build script'"
+    "dev": "next dev",
+    "build": "next build && next export",
+    "start": "next start"
+  },
+  "dependencies": {
+    "next": "^14.0.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
   }
 }
+
